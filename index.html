@@ -83,7 +83,30 @@
     .input{ flex:1; height:48px; border:3px solid #1f2937; border-radius:16px; padding:10px 12px; font-family:"Nunito",system-ui,sans-serif; font-size:16px; box-shadow: 0 4px 0 #1f2937; }
     .send{ border:none; padding:12px 18px; border-radius:14px; cursor: pointer; background: linear-gradient(180deg, #60a5fa, #2563eb); color:#fff; font-weight:800; box-shadow:0 6px 0 #1e3a8a; align-self:flex-end; }
     .send:disabled{ cursor:default; filter: saturate(.2) brightness(.95); box-shadow:0 6px 0 #94a3b8; }
-    .chat-canvas{ background:#f8fbff; border:3px solid #1f2937; border-radius:20px; padding:10px; box-shadow: var(--shadow); display:flex; flex-direction:column; gap:8px; height:100%; }
+    .chat-canvas{ background:#f8fbff; border:2px solid rgba(17,24,39,.8); outline:1px solid rgba(17,24,39,.25); border-radius:20px; padding:10px; box-shadow: 0 10px 22px rgba(0,0,0,.15); display:flex; flex-direction:column; gap:8px; height:100%; }
+    /* Snap-to-desktop look for calendar */
+  .calendar-pane{ box-shadow: 0 10px 22px rgba(0,0,0,.15); outline:1px solid rgba(17,24,39,.25); }
+  /* Bubble entrance */
+  @keyframes popIn{0%{transform:scale(.96) translateY(6px); opacity:.0}100%{transform:scale(1) translateY(0); opacity:1}}
+  .bubble{ animation: popIn .22s ease-out; }
+  /* Typing indicator */
+  .typing{ align-self:flex-start; background:#fff; border:2px dashed #64748b; font-style:italic; opacity:.9; }
+  /* Header controls */
+  .header-actions{ margin-left:auto; display:flex; gap:8px; }
+  .icon-btn{ min-width:40px; height:32px; border-radius:10px; border:2px solid #111827; background:#fff; cursor:pointer; font-weight:800; box-shadow:0 4px 0 #111827; }
+  .icon-btn:focus{ outline:3px solid #60a5fa; outline-offset:2px; }
+  .input:focus{ outline:3px solid #60a5fa; outline-offset:2px; }
+  /* Theme */
+  body[data-theme="dark"]{ --card:#0f172a; --ink:#e2e8f0; background:#0b1020; }
+  body[data-theme="dark"] .chat-header{ background:#0b132b; color:#e2e8f0; }
+  body[data-theme="dark"] .calendar-pane{ background:#0f172a; color:#e2e8f0; border-color:#94a3b8; }
+  body[data-theme="dark"] .cal-card{ background:#0b132b; color:#e2e8f0; border-color:#94a3b8; }
+  /* Mobile fallback */
+  @media (max-width: 900px){
+    .floating-chat{ left: 20px; right: 20px; width:auto; top: 80px; bottom: 170px; }
+    .calendar-pane{ left: 20px; right: 20px; width:auto; top: calc(80px + 360px); max-height: calc(100% - 220px); }
+    .composer-row{ position: sticky; bottom: 0; background: linear-gradient(#f8fbff, #f8fbff); padding-bottom:6px; border-top:1px solid rgba(0,0,0,.06); }
+  }
   </style>
 </head>
 <body>
@@ -120,8 +143,14 @@
 
       <div class="chat-wrap" id="chatWrap">
         <div class="chat-canvas">
-          <div class="chat-header">💬 Friend — online</div>
-          <div class="chat" id="chat"></div>
+          <div class="chat-header">💬 Friend — online
+            <div class="header-actions">
+              <button class="icon-btn" id="themeToggle" title="Toggle theme">🌓</button>
+              <button class="icon-btn" id="fxToggle" title="Toggle sounds">🔈</button>
+            </div>
+          </div>
+          <div class="chat" id="chat" role="log" aria-live="polite">  <div class="bubble typing" id="typing" style="display:none">Friend is typing…</div>
+          </div>
           <div class="composer-row">
             <input class="input" id="textInput" type="text" placeholder="Type your reply..." autocomplete="off" />
             <button class="send" id="sendBtn" disabled>Send</button>
@@ -216,9 +245,9 @@
     const modalClose = document.getElementById('modalClose');
     function openPlan(day){ modalTitle.textContent = day; modalBody.textContent = plans[day] || 'No plan yet.'; modal.classList.add('open'); }
     function closeModal(){ modal.classList.remove('open'); }
-    if(grid){ grid.addEventListener('click', (e)=>{ const card = e.target.closest('.cal-card'); if(card){ openPlan(card.dataset.day); } }); }
+    if(grid){ grid.addEventListener('click', (e)=>{ const card = e.target.closest('.cal-card'); if(card){ const day = card.dataset.day; openPlan(day); const templ = templateFromDay(day); if(templ){ textInput.value = templ; updateSendDisabled(); } } }); }
     if(modalClose) modalClose.addEventListener('click', closeModal);
-    if(modal) modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+    if(modal) modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); }); });
 
     // ===== Chat typing logic =====
     function sendMessage(){
