@@ -61,7 +61,7 @@
     /* ===== Scene 3 ===== */
     .scene3-wrap{ display:none; margin-top:8px; }
     .bg-stage3{ position: relative; width: 100%; min-height: 88vh; aspect-ratio: auto; border-radius: 18px; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; margin: clamp(4px, 1.2vw, 12px); }
-    .floating-chat{ position:absolute; left: 36px; top: 100px; bottom: 180px; width: min(560px, 58%); z-index: 6; display:flex; flex-direction:column; gap:10px; }
+    .floating-chat{ position:absolute; left: 36px; top: 100px; bottom: 180px; width: min(480px, 52%); z-index: 6; display:flex; flex-direction:column; gap:10px; }
     .calendar-pane{ position:absolute; right:36px; top:100px; bottom:auto; max-height: calc(100% - 190px); width:min(260px, 28%); z-index:7; background:#fff; border-radius:18px; box-shadow: var(--shadow); border: 2px solid rgba(17,24,39,.8); outline:1px solid rgba(17,24,39,.25); padding:12px 14px 8px; }
     .calendar-title{ font-family:"Fredoka","Nunito",system-ui,sans-serif; font-weight:800; margin:0 0 8px; font-size: clamp(18px,2.4vw,22px); }
     .calendar-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
@@ -96,7 +96,26 @@
     .cal-fab{ position:absolute; right:24px; bottom:140px; z-index:9; display:none; width:52px; height:52px; border-radius:50%; border:2px solid #111827; background:#fff07a; box-shadow:0 8px 0 #111827; font-weight:900; font-size:22px; cursor:pointer; }
     .cal-fab:focus{ outline:3px solid #60a5fa; outline-offset:2px; }
     @media (max-width: 900px){
-      .cal-fab{ display:inline-flex; align-items:center; justify-content:center; }
+    .cal-fab{ display:inline-flex; align-items:center; justify-content:center; }
+    .calendar-pane{ display:none; }
+    /* Small overlay calendar when opened from the FAB */
+    .calendar-pane.open{ display:block; position:absolute; left:auto; right:20px; top: 100px; bottom: auto; width: min(320px, 70vw); max-height: calc(100% - 220px); }
+    .floating-chat{ left: 20px; right: 20px; width:auto; top: 80px; bottom: 170px; }
+  }
+    .calendar-pane{ display:none; }
+    .calendar-pane.open{ display:block; left:20px; right:20px; top: 100px; bottom: 120px; max-height:none; width:auto; }
+    .floating-chat{ left: 20px; right: 20px; width:auto; top: 80px; bottom: 170px; }
+  }
+      .floating-chat{ position:absolute; left: max(12px, env(safe-area-inset-left) + 12px); right: max(12px, env(safe-area-inset-right) + 12px); width:auto; top: 90px; bottom: 160px; }
+      /* Calendar is hidden by default; when opened, it overlays nicely inside the desktop with spacing */
+      .calendar-pane{ display:none; position:absolute; left: max(12px, env(safe-area-inset-left) + 12px); right: max(12px, env(safe-area-inset-right) + 12px); top: 96px; bottom: 160px; width:auto; max-height:none; z-index: 20; }
+      .calendar-pane.open{ display:block; }
+      /* Larger touch targets and readable spacing */
+      .cal-card{ padding:14px 16px; }
+      .composer-row{ position: sticky; bottom: 0; background: #f8fbff; padding-bottom:8px; border-top:1px solid rgba(0,0,0,.06); }
+      /* FAB shows only on mobile */
+      .cal-fab{ display:inline-flex; align-items:center; justify-content:center; bottom: 132px; right: max(16px, env(safe-area-inset-right) + 12px); }
+    }
       .calendar-pane{ display:none; }
       .calendar-pane.open{ display:block; left:20px; right:20px; top: 100px; bottom: 120px; max-height:none; width:auto; }
       .floating-chat{ left: 20px; right: 20px; width:auto; top: 80px; bottom: 170px; }
