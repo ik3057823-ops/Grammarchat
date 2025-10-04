@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Present Continuous Chat Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #ffffff; /* white background per user preference */
+      --ink: #1a1a1a;
+      --card: #fff;
+      --accent: #6d5efc;
+      --accent-2: #22c55e;
+      --accent-3: #f59e0b;
+      --shadow: 0 10px 25px rgba(0,0,0,.08);
+      --radius: 26px;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; background: var(--bg);
+      color: var(--ink);
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    .screen{
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      padding: clamp(16px, 4vw, 48px);
+    }
+    .card{
+      width:min(860px, 100%);
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(22px, 4vw, 44px);
+      border: 4px solid #1f2937;
+      position: relative;
+      overflow: hidden;
+      isolation:isolate;
+    }
+    /* playful confetti corners */
+    .card::before, .card::after{
+      content:""; position:absolute; inset:auto auto -40px -40px; width:140px; height:140px;
+      background: radial-gradient( circle at 30% 30%, var(--accent) 0 35%, transparent 36% ),
+                  radial-gradient( circle at 70% 70%, var(--accent-2) 0 35%, transparent 36% ),
+                  radial-gradient( circle at 75% 25%, var(--accent-3) 0 28%, transparent 29% );
+      opacity:.25; filter: blur(1px); transform: rotate(-12deg);
+      z-index:-1;
+    }
+    .card::after{ inset:-40px -40px auto auto; transform: rotate(18deg); }
+
+    .title{
+      font-family: "Fredoka", "Nunito", system-ui, sans-serif;
+      font-size: clamp(28px, 4.6vw, 48px);
+      line-height: 1.1;
+      margin: 0 0 12px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 0 #ffffff, 0 4px 0 rgba(0,0,0,.1);
+    }
+    .subtitle{
+      font-size: clamp(16px, 2.1vw, 20px);
+      margin: 0 0 22px;
+    }
+    .list{
+      margin: 0 0 28px; padding-left: 1.1em;
+    }
+    .list li{ margin: 8px 0; }
+
+    .cta{
+      display:inline-block; border:none; cursor:pointer;
+      font-family: "Fredoka", "Nunito", system-ui, sans-serif;
+      font-weight: 800; letter-spacing: .4px;
+      font-size: clamp(18px, 2.6vw, 22px);
+      padding: 14px 26px; border-radius: 18px;
+      background: linear-gradient(180deg, #ffd34d, #f59e0b);
+      color: #111827; box-shadow: 0 8px 0 #111827, 0 12px 24px rgba(0,0,0,.15);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+    }
+    .cta:hover{ transform: translateY(-2px); filter: brightness(1.03); }
+    .cta:active{ transform: translateY(2px); box-shadow: 0 4px 0 #111827; }
+
+    /* Chat scene */
+    .chat-wrap{ display:none; }
+    .chat{
+      display:flex; flex-direction:column; gap:14px; height: 60vh; min-height: 420px;
+      background:#f8fafc; border-radius: 20px; padding: 16px; overflow:auto; border:2px dashed #cbd5e1;
+    }
+    .bubble{ max-width: 78%; padding: 12px 14px; border-radius: 18px; line-height: 1.35; box-shadow: var(--shadow);}
+    .friend{ align-self:flex-start; background:#fff; border:2px solid #1f2937;}
+    .me{ align-self:flex-end; background:#dcfce7; border:2px solid #166534;}
+
+    .composer{ display:flex; gap:10px; margin-top:14px; }
+    .composer input{
+      flex:1; padding:14px 16px; border-radius:14px; border:2px solid #1f2937; font-size:16px;
+      outline:none; box-shadow: var(--shadow);
+    }
+    .send{
+      border:none; padding: 12px 18px; border-radius: 14px; cursor:pointer;
+      background: linear-gradient(180deg, #a78bfa, #6d5efc);
+      color:#fff; font-weight:800; box-shadow: 0 6px 0 #312e81;
+      transition: transform .12s ease;
+    }
+    .send:active{ transform: translateY(2px); box-shadow: 0 3px 0 #312e81; }
+
+    .badge{
+      display:inline-flex; align-items:center; gap:8px; font-weight:800; font-size:14px; padding:8px 12px; border-radius:999px;
+      background:#eef2ff; border:2px solid #312e81; margin-bottom:12px;
+    }
+    .hint{ font-size:14px; opacity:.8; }
+      /* compact callout replacing bullets */
+    .callout{ background:#eef2ff; border:2px solid #312e81; border-radius:16px; padding:14px 16px; margin:0 0 24px; font-weight:700; }
+    .callout em{ font-style:normal; font-weight:800; }
+  </style>
+</head>
+<body>
+  <main class="screen">
+    <section class="card" id="scene">
+      <!-- Instructions Scene -->      <h1 class="title">Chat & Practice: Present Continuous</h1>
+      <p class="subtitle">
+        In this mini‑game, you’ll <strong>chat with a friendly partner</strong> and practice the
+        <em>present continuous</em> (am/are/is + verb‑ing).
+      </p>
+      <div class="callout">Practice the <em>present continuous</em> by chatting in real time. Use your knowledge of present continuous to reply to your friend.</div>
+      <button class="cta" id="start">▶ Start</button>
+
+      <!-- Chat Scene (hidden until Start) -->
+      <div class="chat-wrap" id="chatWrap">
+        <div class="chat" id="chat"></div>
+        <div class="composer">
+          <input id="input" type="text" placeholder="Write your message using present continuous…" autocomplete="off" />
+          <button class="send" id="send">Send</button>
+        </div>
+        <p class="hint">Tip: Structure = <strong>Subject + am/are/is + verb‑ing</strong> · e.g., “We are playing.”</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const startBtn = document.getElementById('start');
+    const scene = document.getElementById('scene');
+    const chatWrap = document.getElementById('chatWrap');
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+
+    function show(el){ el.style.display='block'; }
+    function hide(el){ el.style.display='none'; }
+
+    function addBubble(text, who='friend'){
+      const b = document.createElement('div');
+      b.className = `bubble ${who}`;
+      b.textContent = text;
+      chat.appendChild(b);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    const starters = [
+      "Hey! What are you doing right now?",
+      "Hi there! I'm making a sandwich. What are you doing?",
+      "Hello! I'm reading a comic at the moment. How about you?"
+    ];
+
+    function randomOf(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function isPresentContinuous(sentence){
+      // Very simple heuristic check for present continuous patterns
+      const s = sentence.trim();
+      // Common contractions & forms
+      const patterns = [
+        /\b(I\s*am|I'm)\s+\w+ing\b/i,
+        /\b(you\s*are|you're)\s+\w+ing\b/i,
+        /\b(he\s*is|he's)\s+\w+ing\b/i,
+        /\b(she\s*is|she's)\s+\w+ing\b/i,
+        /\b(it\s*is|it's)\s+\w+ing\b/i,
+        /\b(we\s*are|we're)\s+\w+ing\b/i,
+        /\b(they\s*are|they're)\s+\w+ing\b/i
+      ];
+      return patterns.some(rx => rx.test(s));
+    }
+
+    function feedbackFor(sentence){
+      if(isPresentContinuous(sentence)){
+        const praise = [
+          "Nice present continuous! ✅",
+          "Great! That's the right form. ✨",
+          "Perfect structure—keep going! 💪"
+        ];
+        return randomOf(praise);
+      }
+      // If not present continuous, nudge with a mini‑hint
+      const hints = [
+        "Try: I am + verb‑ing (e.g., I am studying).",
+        "Use am/are/is + verb‑ing. For example: We are playing.",
+        "Remember: He/She/It is + verb‑ing (e.g., She is cooking)."
+      ];
+      return randomOf(hints);
+    }
+
+    function botReplyTo(userText){
+      if(isPresentContinuous(userText)){
+        const followUps = [
+          "Sounds fun! Who are you doing it with?",
+          "Cool! Where are you doing that?",
+          "Nice! How long are you doing it for?"
+        ];
+        return randomOf(followUps);
+      }
+      return "Almost there! " + feedbackFor(userText);
+    }
+
+    function startGame(){
+      // Hide instructions, reveal chat
+      startBtn.remove();
+      show(chatWrap);
+      addBubble(randomOf(starters), 'friend');
+      input.focus();
+    }
+
+    function sendMessage(){
+      const text = input.value.trim();
+      if(!text) return;
+      addBubble(text, 'me');
+      input.value = '';
+      setTimeout(() => {
+        addBubble(feedbackFor(text), 'friend');
+        setTimeout(()=> addBubble(botReplyTo(text), 'friend'), 400);
+      }, 300);
+    }
+
+    startBtn.addEventListener('click', startGame);
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMessage(); });
+  </script>
+</body>
+</html>
