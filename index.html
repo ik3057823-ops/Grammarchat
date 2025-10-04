@@ -37,7 +37,7 @@
     /* Chat UI */
     .chat-wrap{ display:none; }
     .chat{ flex:1; display:flex; flex-direction:column; gap:8px; min-height: 160px; background:transparent; border-radius: 10px; padding: 6px; overflow: auto; border:none; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
-    .chat-header{ background:#111827; color:#fff; border:2px solid #1f2937; border-radius:14px; padding:8px 12px; font-weight:800; display:flex; align-items:center; gap:8px; }
+    .chat-header{ background:#111827; color:#fff; border:2px solid #1f2937; border-radius:14px; padding:8px 12px; font-weight:800; display:flex; align-items:center; gap:8px; cursor: grab; user-select:none; }
     .bubble{ max-width: 78%; padding: 12px 14px; border-radius: 18px; line-height: 1.35; box-shadow: var(--shadow);} 
     .friend{ align-self:flex-start; background:#fff; border:2px solid #1f2937; position:relative; }
     .friend::after{ content:""; position:absolute; left:-8px; top:12px; width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-right:8px solid #fff; }
@@ -83,30 +83,16 @@
     .input{ flex:1; height:48px; border:3px solid #1f2937; border-radius:16px; padding:10px 12px; font-family:"Nunito",system-ui,sans-serif; font-size:16px; box-shadow: 0 4px 0 #1f2937; }
     .send{ border:none; padding:12px 18px; border-radius:14px; cursor: pointer; background: linear-gradient(180deg, #60a5fa, #2563eb); color:#fff; font-weight:800; box-shadow:0 6px 0 #1e3a8a; align-self:flex-end; }
     .send:disabled{ cursor:default; filter: saturate(.2) brightness(.95); box-shadow:0 6px 0 #94a3b8; }
-    .chat-canvas{ background:#f8fbff; border:2px solid rgba(17,24,39,.8); outline:1px solid rgba(17,24,39,.25); border-radius:20px; padding:10px; box-shadow: 0 10px 22px rgba(0,0,0,.15); display:flex; flex-direction:column; gap:8px; height:100%; }
+    .chat-canvas{ position:relative; background:#f8fbff; border:2px solid rgba(17,24,39,.8); outline:1px solid rgba(17,24,39,.25); border-radius:20px; padding:10px; box-shadow: 0 10px 22px rgba(0,0,0,.15); display:flex; flex-direction:column; gap:8px; height:100%; }
     /* Snap-to-desktop look for calendar */
-  .calendar-pane{ box-shadow: 0 10px 22px rgba(0,0,0,.15); outline:1px solid rgba(17,24,39,.25); }
-  /* Bubble entrance */
-  @keyframes popIn{0%{transform:scale(.96) translateY(6px); opacity:.0}100%{transform:scale(1) translateY(0); opacity:1}}
-  .bubble{ animation: popIn .22s ease-out; }
-  /* Typing indicator */
-  .typing{ align-self:flex-start; background:#fff; border:2px dashed #64748b; font-style:italic; opacity:.9; }
-  /* Header controls */
-  .header-actions{ margin-left:auto; display:flex; gap:8px; }
-  .icon-btn{ min-width:40px; height:32px; border-radius:10px; border:2px solid #111827; background:#fff; cursor:pointer; font-weight:800; box-shadow:0 4px 0 #111827; }
-  .icon-btn:focus{ outline:3px solid #60a5fa; outline-offset:2px; }
-  .input:focus{ outline:3px solid #60a5fa; outline-offset:2px; }
-  /* Theme */
-  body[data-theme="dark"]{ --card:#0f172a; --ink:#e2e8f0; background:#0b1020; }
-  body[data-theme="dark"] .chat-header{ background:#0b132b; color:#e2e8f0; }
-  body[data-theme="dark"] .calendar-pane{ background:#0f172a; color:#e2e8f0; border-color:#94a3b8; }
-  body[data-theme="dark"] .cal-card{ background:#0b132b; color:#e2e8f0; border-color:#94a3b8; }
-  /* Mobile fallback */
-  @media (max-width: 900px){
-    .floating-chat{ left: 20px; right: 20px; width:auto; top: 80px; bottom: 170px; }
-    .calendar-pane{ left: 20px; right: 20px; width:auto; top: calc(80px + 360px); max-height: calc(100% - 220px); }
-    .composer-row{ position: sticky; bottom: 0; background: linear-gradient(#f8fbff, #f8fbff); padding-bottom:6px; border-top:1px solid rgba(0,0,0,.06); }
-  }
+    .calendar-pane{ box-shadow: 0 10px 22px rgba(0,0,0,.15); outline:1px solid rgba(17,24,39,.25); }
+    /* Bubble entrance */
+    @keyframes popIn{0%{transform:scale(.96) translateY(6px); opacity:.0}100%{transform:scale(1) translateY(0); opacity:1}}
+    .bubble{ animation: popIn .22s ease-out; }
+    /* Typing indicator */
+    .typing{ align-self:flex-start; background:#fff; border:2px dashed #64748b; font-style:italic; opacity:.9; }
+    .new-badge{ position:absolute; right:12px; bottom:56px; padding:6px 10px; font-weight:800; border-radius:12px; border:2px solid #111827; background:#fff07a; box-shadow:0 4px 0 #111827; }
+    .chat-header.dragging{ cursor: grabbing; }
   </style>
 </head>
 <body>
@@ -144,8 +130,9 @@
       <div class="chat-wrap" id="chatWrap">
         <div class="chat-canvas">
           <div class="chat-header">💬 Friend — online</div>
-          </div>
-          <div class="chat" id="chat" role="log" aria-live="polite">  <div class="bubble typing" id="typing" style="display:none">Friend is typing…</div>
+          <button class="new-badge" id="newBadge" style="display:none">New messages</button>
+          <div class="chat" id="chat" role="log" aria-live="polite">
+            <div class="bubble typing" id="typing" style="display:none">Friend is typing…</div>
           </div>
           <div class="composer-row">
             <input class="input" id="textInput" type="text" placeholder="Type your reply..." autocomplete="off" />
@@ -193,7 +180,8 @@
       b.className = `bubble ${who}`;
       b.textContent = text;
       chat.appendChild(b);
-      chat.scrollTop = chat.scrollHeight;
+      const atBottom = isAtBottom();
+      if(atBottom){ scrollToBottom(); } else { bumpUnseen(); }
     }
 
     const firstQuestion = "Hi! What are you doing on Wednesday?";
@@ -247,9 +235,19 @@
 
     // ===== Chat typing logic + typing indicator (no sounds/theme) =====
     const typing = document.getElementById('typing');
+    const newBadge = document.getElementById('newBadge');
     function showTyping(){ if(typing){ typing.style.display='block'; } }
     function hideTyping(){ if(typing){ typing.style.display='none'; } }
     function friendAutoReply(){ showTyping(); setTimeout(()=>{ hideTyping(); addBubble('Nice! See you then. 😊', 'friend'); }, 1200); }
+
+    function isAtBottom(){ return (chat.scrollHeight - chat.scrollTop - chat.clientHeight) < 4; }
+    function scrollToBottom(){ chat.scrollTop = chat.scrollHeight; hideBadge(); unseen=0; }
+    let unseen = 0;
+    function bumpUnseen(){ unseen++; if(newBadge){ newBadge.style.display='inline-block'; newBadge.textContent = unseen>1? `${unseen} new messages` : 'New message'; } }
+    function hideBadge(){ if(newBadge){ newBadge.style.display='none'; } }
+
+    chat.addEventListener('scroll', ()=>{ if(isAtBottom()){ hideBadge(); unseen=0; } });
+    if(newBadge){ newBadge.addEventListener('click', scrollToBottom); }
 
     function sendMessage(){
       const val = (textInput.value || '').trim();
@@ -268,6 +266,20 @@
       const map = { Wednesday: 'I am going to swimming.', Friday: 'I am studying math.', Sunday: 'I am going to the cinema.' };
       return map[day] || '';
     }
+
+    // Draggable chat by header
+    (function enableDrag(){
+      const header = document.querySelector('#chatWrap .chat-header');
+      const panel = document.getElementById('chatWrap');
+      const stage = document.getElementById('bgStage3');
+      if(!header || !panel || !stage) return;
+      let sx=0, sy=0, px=0, py=0, dragging=false;
+      function onDown(e){ dragging=true; header.classList.add('dragging'); const rect = panel.getBoundingClientRect(); px = rect.left; py = rect.top; sx = (e.touches? e.touches[0].clientX : e.clientX); sy = (e.touches? e.touches[0].clientY : e.clientY); panel.style.bottom=''; panel.style.height=rect.height+'px'; document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp); document.addEventListener('touchmove', onMove, {passive:false}); document.addEventListener('touchend', onUp); }
+      function onMove(e){ if(!dragging) return; e.preventDefault(); const cx = (e.touches? e.touches[0].clientX : e.clientX); const cy = (e.touches? e.touches[0].clientY : e.clientY); let nx = px + (cx - sx); let ny = py + (cy - sy);
+        const sb = stage.getBoundingClientRect(); const pb = panel.getBoundingClientRect(); const pad=20; const maxX = sb.right - pb.width - pad; const maxY = sb.bottom - pb.height - pad; const minX = sb.left + pad; const minY = sb.top + 60; if(nx<minX) nx=minX; if(ny<minY) ny=minY; if(nx>maxX) nx=maxX; if(ny>maxY) ny=maxY; panel.style.left = (nx - sb.left) + 'px'; panel.style.top  = (ny - sb.top) + 'px'; }
+      function onUp(){ dragging=false; header.classList.remove('dragging'); document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp); }
+      header.addEventListener('mousedown', onDown); header.addEventListener('touchstart', onDown, {passive:true});
+    })();
 
     // --- Tests (kept as-is, plus a small extra) ---
     (function chatTests(){
@@ -304,6 +316,10 @@
         console.assert(plans['Wednesday']?.toLowerCase().includes('going to swimming'), 'Wednesday plan mismatch');
         console.assert(plans['Friday']?.toLowerCase().includes('studying math'), 'Friday plan mismatch');
         console.assert(plans['Sunday']?.toLowerCase().includes('going to the cinema'), 'Sunday plan mismatch');
+        // Structure: chat and composer should be inside chat-canvas
+        const canvas = document.querySelector('#chatWrap .chat-canvas');
+        const chatEl = document.getElementById('chat');
+        console.assert(canvas && canvas.contains(chatEl), 'Chat should be inside chat-canvas');
       }catch(e){ console.warn('UI test error:', e); }
     })();
 
