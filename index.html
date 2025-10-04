@@ -36,13 +36,13 @@
 
     /* Chat UI */
     .chat-wrap{ display:none; }
-    .chat{ flex:1; display:flex; flex-direction:column; gap:8px; min-height: 160px; background:transparent; border-radius: 10px; padding: 6px; overflow: auto; border:none; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
-    .chat-header{ background:#111827; color:#fff; border:2px solid #1f2937; border-radius:14px; padding:8px 12px; font-weight:800; display:flex; align-items:center; gap:8px; cursor: grab; user-select:none; }
-    .bubble{ max-width: 78%; padding: 12px 14px; border-radius: 18px; line-height: 1.35; box-shadow: var(--shadow);} 
-    .friend{ align-self:flex-start; background:#fff; border:2px solid #1f2937; position:relative; }
-    .friend::after{ content:""; position:absolute; left:-8px; top:12px; width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-right:8px solid #fff; }
-    .me{ align-self:flex-end; background:#dcfce7; border:2px solid #166534; position:relative; }
-    .me::after{ content:""; position:absolute; right:-8px; top:12px; width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-left:8px solid #dcfce7; }
+    .chat{ flex:1; display:flex; flex-direction:column; gap:8px; min-height: 160px; background:transparent; border-radius: 10px; padding: 6px; overflow-y: auto; overflow-x: hidden; border:none; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
+    .chat-header{ background:#111827; color:#fff; border:2px solid #1f2937; border-radius:14px; padding:8px 12px; font-weight:800; display:flex; align-items:center; gap:8px; }
+    .bubble{ max-width: 78%; padding: 12px 14px; border-radius: 18px; line-height: 1.35; box-shadow: 0 6px 0 rgba(0,0,0,.25); border:3px solid #111827; position:relative; }
+    .friend{ align-self:flex-start; background: linear-gradient(180deg,#fff7c2,#fde68a); }
+    .friend::after{ content:""; position:absolute; left:-10px; bottom:10px; width:18px; height:18px; background: inherit; border-left:3px solid #111827; border-bottom:3px solid #111827; transform: rotate(45deg); border-bottom-left-radius:6px; }
+    .me{ align-self:flex-end; background: linear-gradient(180deg,#c7f9e5,#86efac); border:3px solid #111827; position:relative; }
+    .me::after{ content:""; position:absolute; right:-10px; bottom:10px; width:18px; height:18px; background: inherit; border-right:3px solid #111827; border-bottom:3px solid #111827; transform: rotate(-45deg); border-bottom-right-radius:6px; }
     .hint{ font-size:14px; opacity:.8; }
 
     .callout{ background:#eef2ff; border:2px solid #312e81; border-radius:16px; padding:14px 16px; margin:0 0 24px; font-weight:700; }
@@ -92,7 +92,15 @@
     /* Typing indicator */
     .typing{ align-self:flex-start; background:#fff; border:2px dashed #64748b; font-style:italic; opacity:.9; }
     .new-badge{ position:absolute; right:12px; bottom:56px; padding:6px 10px; font-weight:800; border-radius:12px; border:2px solid #111827; background:#fff07a; box-shadow:0 4px 0 #111827; }
-    .chat-header.dragging{ cursor: grabbing; }
+    /* Calendar toggle (mobile FAB) */
+    .cal-fab{ position:absolute; right:24px; bottom:140px; z-index:9; display:none; width:52px; height:52px; border-radius:50%; border:2px solid #111827; background:#fff07a; box-shadow:0 8px 0 #111827; font-weight:900; font-size:22px; cursor:pointer; }
+    .cal-fab:focus{ outline:3px solid #60a5fa; outline-offset:2px; }
+    @media (max-width: 900px){
+      .cal-fab{ display:inline-flex; align-items:center; justify-content:center; }
+      .calendar-pane{ display:none; }
+      .calendar-pane.open{ display:block; left:20px; right:20px; top: 100px; bottom: 120px; max-height:none; width:auto; }
+      .floating-chat{ left: 20px; right: 20px; width:auto; top: 80px; bottom: 170px; }
+    }
   </style>
 </head>
 <body>
@@ -112,6 +120,7 @@
 
       <div class="scene3-wrap" id="scene3">
         <div class="bg-stage3" id="bgStage3" style="background-image:url('https://raw.githubusercontent.com/ik3057823-ops/media/refs/heads/main/windows.png');">
+          <button class="cal-fab" id="calFab" aria-label="Open calendar" aria-controls="calendarPane" aria-expanded="false">📅</button>
           <div class="calendar-pane" id="calendarPane" aria-live="polite">
             <h3 class="calendar-title">📅 This Week</h3>
             <div class="calendar-grid" id="calendarGrid">
@@ -170,6 +179,7 @@
     const overlayInstruction = document.getElementById('overlayInstruction');
     const scene3 = document.getElementById('scene3');
     const bgStage3 = document.getElementById('bgStage3');
+    const calFab = document.getElementById('calFab');
     const bgm = document.getElementById('bgm');
 
     function show(el){ if(el) el.style.display='block'; }
@@ -207,7 +217,7 @@
       show(scene3);
       if(chatWrap && !chatWrap.classList.contains('floating-chat')){
         chatWrap.classList.add('floating-chat');
-        bgStage3.appendChild(chatWrap);
+        if(bgStage3){ bgStage3.appendChild(chatWrap); }
       }
       show(chatWrap);
       if(chat && chat.children.length===0){ addBubble(firstQuestion, 'friend'); }
@@ -232,6 +242,32 @@
     if(grid){ grid.addEventListener('click', (e)=>{ const card = e.target.closest('.cal-card'); if(card){ const day = card.dataset.day; openPlan(day); const templ = templateFromDay(day); if(templ){ textInput.value = templ; updateSendDisabled(); } } }); }
     if(modalClose) modalClose.addEventListener('click', closeModal);
     if(modal) modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+
+    // Mobile calendar toggle + enhance calendar click
+    (function mobileCalendar(){
+      const calendarPane = document.getElementById('calendarPane');
+      if(calFab && calendarPane){
+        calFab.addEventListener('click', ()=>{
+          const open = calendarPane.classList.toggle('open');
+          calFab.setAttribute('aria-expanded', String(open));
+        });
+      }
+      const grid = document.getElementById('calendarGrid');
+      if(grid && !grid.__boundMobile){
+        grid.addEventListener('click', (e)=>{
+          const card = e.target.closest('.cal-card');
+          if(!card) return;
+          const day = card.dataset.day;
+          const templ = templateFromDay(day);
+          if(templ){ textInput.value = templ; updateSendDisabled(); }
+          if(window.matchMedia && window.matchMedia('(max-width: 900px)').matches && calendarPane){
+            calendarPane.classList.remove('open');
+            if(calFab) calFab.setAttribute('aria-expanded','false');
+          }
+        });
+        grid.__boundMobile = true;
+      }
+    })();
 
     // ===== Chat typing logic + typing indicator (no sounds/theme) =====
     const typing = document.getElementById('typing');
@@ -266,20 +302,6 @@
       const map = { Wednesday: 'I am going to swimming.', Friday: 'I am studying math.', Sunday: 'I am going to the cinema.' };
       return map[day] || '';
     }
-
-    // Draggable chat by header
-    (function enableDrag(){
-      const header = document.querySelector('#chatWrap .chat-header');
-      const panel = document.getElementById('chatWrap');
-      const stage = document.getElementById('bgStage3');
-      if(!header || !panel || !stage) return;
-      let sx=0, sy=0, px=0, py=0, dragging=false;
-      function onDown(e){ dragging=true; header.classList.add('dragging'); const rect = panel.getBoundingClientRect(); px = rect.left; py = rect.top; sx = (e.touches? e.touches[0].clientX : e.clientX); sy = (e.touches? e.touches[0].clientY : e.clientY); panel.style.bottom=''; panel.style.height=rect.height+'px'; document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp); document.addEventListener('touchmove', onMove, {passive:false}); document.addEventListener('touchend', onUp); }
-      function onMove(e){ if(!dragging) return; e.preventDefault(); const cx = (e.touches? e.touches[0].clientX : e.clientX); const cy = (e.touches? e.touches[0].clientY : e.clientY); let nx = px + (cx - sx); let ny = py + (cy - sy);
-        const sb = stage.getBoundingClientRect(); const pb = panel.getBoundingClientRect(); const pad=20; const maxX = sb.right - pb.width - pad; const maxY = sb.bottom - pb.height - pad; const minX = sb.left + pad; const minY = sb.top + 60; if(nx<minX) nx=minX; if(ny<minY) ny=minY; if(nx>maxX) nx=maxX; if(ny>maxY) ny=maxY; panel.style.left = (nx - sb.left) + 'px'; panel.style.top  = (ny - sb.top) + 'px'; }
-      function onUp(){ dragging=false; header.classList.remove('dragging'); document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp); }
-      header.addEventListener('mousedown', onDown); header.addEventListener('touchstart', onDown, {passive:true});
-    })();
 
     // --- Tests (kept as-is, plus a small extra) ---
     (function chatTests(){
