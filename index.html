@@ -36,7 +36,7 @@
 
     /* Chat UI */
     .chat-wrap{ display:none; }
-    .chat{ display:flex; flex-direction:column; gap:10px; height:auto; min-height: 220px; background:transparent; border-radius: 12px; padding: 8px; overflow: visible; border:none; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
+    .chat{ flex:1; display:flex; flex-direction:column; gap:8px; min-height: 160px; background:transparent; border-radius: 10px; padding: 6px; overflow: visible; border:none; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
     .chat-header{ background:#111827; color:#fff; border:2px solid #1f2937; border-radius:14px; padding:8px 12px; font-weight:800; display:flex; align-items:center; gap:8px; }
     .bubble{ max-width: 78%; padding: 12px 14px; border-radius: 18px; line-height: 1.35; box-shadow: var(--shadow);} 
     .friend{ align-self:flex-start; background:#fff; border:2px solid #1f2937; position:relative; }
@@ -50,7 +50,7 @@
 
     /* ===== Scene 2 ===== */
     .scene2-wrap{ display:none; margin-top: 8px; }
-    .bg-stage{ position: relative; width: 100%; min-height: 85vh; aspect-ratio: auto; border-radius: 18px; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; margin: clamp(8px, 2vw, 20px); }
+    .bg-stage{ position: relative; width: 100%; min-height: 85vh; aspect-ratio: auto; border-radius: 18px; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; margin: clamp(4px, 1.2vw, 12px); }
     .overlay-instruction{ position: absolute; left: 14px; bottom: 14px; z-index: 5; display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 18px; font-family: "Fredoka", "Nunito", system-ui, sans-serif; font-weight: 800; letter-spacing: .4px; font-size: clamp(16px, 2.2vw, 20px); background: linear-gradient(180deg, #ffd34d, #f59e0b); color: #111827; box-shadow: 0 8px 0 #111827, 0 12px 24px rgba(0,0,0,.15); }
     .overlay-instruction.pulse{ animation: throb 1s ease-in-out infinite; }
     @keyframes throb { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
@@ -60,9 +60,9 @@
 
     /* ===== Scene 3 ===== */
     .scene3-wrap{ display:none; margin-top:8px; }
-    .bg-stage3{ position: relative; width: 100%; min-height: 88vh; aspect-ratio: auto; border-radius: 18px; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; margin: clamp(8px, 2vw, 20px); }
-    .floating-chat{ position:absolute; left: 40px; top: 80px; bottom: 170px; width: min(540px, 56%); z-index: 6; display:flex; flex-direction:column; gap:12px; overflow:visible; }
-    .calendar-pane{ position:absolute; right:40px; top:80px; bottom:170px; width:min(360px, 36%); z-index:7; background:#fff; border-radius:20px; box-shadow: var(--shadow); border: 3px solid #1f2937; padding:14px 16px; overflow:visible; }
+    .bg-stage3{ position: relative; width: 100%; min-height: 88vh; aspect-ratio: auto; border-radius: 18px; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; margin: clamp(4px, 1.2vw, 12px); }
+    .floating-chat{ position:absolute; left: 36px; top: 100px; bottom: 180px; width: min(460px, 44%); z-index: 6; display:flex; flex-direction:column; gap:10px; }
+    .calendar-pane{ position:absolute; right:36px; top:100px; bottom:auto; max-height: calc(100% - 190px); width:min(300px, 32%); z-index:7; background:#fff; border-radius:18px; box-shadow: var(--shadow); border: 3px solid #1f2937; padding:12px 14px 8px; }
     .calendar-title{ font-family:"Fredoka","Nunito",system-ui,sans-serif; font-weight:800; margin:0 0 8px; font-size: clamp(18px,2.4vw,22px); }
     .calendar-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
     .cal-card{ background:#eef2ff; border:2px solid #312e81; border-radius:14px; padding:10px 12px; font-weight:800; cursor:pointer; }
@@ -79,11 +79,11 @@
     .btn{ display:inline-block; border:none; cursor:pointer; font-family:"Fredoka","Nunito",system-ui,sans-serif; font-weight:800; padding:10px 16px; border-radius:14px; box-shadow: 0 6px 0 #111827; background: linear-gradient(180deg, #ffd34d, #f59e0b); }
 
     /* Chat composer (typing) */
-    .composer-row{ display:flex; align-items:center; gap:10px; margin-top:8px; }
+    .composer-row{ display:flex; align-items:center; gap:10px; margin-top:6px; margin-bottom:0; }
     .input{ flex:1; height:48px; border:3px solid #1f2937; border-radius:16px; padding:10px 12px; font-family:"Nunito",system-ui,sans-serif; font-size:16px; box-shadow: 0 4px 0 #1f2937; }
     .send{ border:none; padding:12px 18px; border-radius:14px; cursor: pointer; background: linear-gradient(180deg, #60a5fa, #2563eb); color:#fff; font-weight:800; box-shadow:0 6px 0 #1e3a8a; align-self:flex-end; }
     .send:disabled{ cursor:default; filter: saturate(.2) brightness(.95); box-shadow:0 6px 0 #94a3b8; }
-    .chat-canvas{ background:#f8fbff; border:3px solid #1f2937; border-radius:22px; padding:12px; box-shadow: var(--shadow); display:flex; flex-direction:column; gap:10px; height:100%; }
+    .chat-canvas{ background:#f8fbff; border:3px solid #1f2937; border-radius:20px; padding:10px; box-shadow: var(--shadow); display:flex; flex-direction:column; gap:8px; height:100%; }
   </style>
 </head>
 <body>
