@@ -36,7 +36,7 @@
 
     /* Chat UI */
     .chat-wrap{ display:none; }
-    .chat{ display:flex; flex-direction:column; gap:12px; height: auto; min-height: 260px; background:#f1f5ff; border-radius: 18px; padding: 14px; overflow: visible; border:2px solid #1f2937; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
+    .chat{ display:flex; flex-direction:column; gap:10px; height:auto; min-height: 220px; background:transparent; border-radius: 12px; padding: 8px; overflow: visible; border:none; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
     .chat-header{ background:#111827; color:#fff; border:2px solid #1f2937; border-radius:14px; padding:8px 12px; font-weight:800; display:flex; align-items:center; gap:8px; }
     .bubble{ max-width: 78%; padding: 12px 14px; border-radius: 18px; line-height: 1.35; box-shadow: var(--shadow);} 
     .friend{ align-self:flex-start; background:#fff; border:2px solid #1f2937; position:relative; }
@@ -61,8 +61,8 @@
     /* ===== Scene 3 ===== */
     .scene3-wrap{ display:none; margin-top:8px; }
     .bg-stage3{ position: relative; width: 100%; min-height: 88vh; aspect-ratio: auto; border-radius: 18px; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; margin: clamp(8px, 2vw, 20px); }
-    .floating-chat{ position:absolute; left: 14px; top: 20px; bottom: 170px; width: min(520px, 56%); z-index: 6; display:flex; flex-direction:column; gap:12px; overflow:visible; }
-    .calendar-pane{ position:absolute; right:24px; top:28px; bottom:170px; width:min(340px, 36%); z-index:7; background:#fff; border-radius:20px; box-shadow: var(--shadow); border: 3px solid #1f2937; padding:14px 16px; overflow:visible; }
+    .floating-chat{ position:absolute; left: 40px; top: 80px; bottom: 170px; width: min(540px, 56%); z-index: 6; display:flex; flex-direction:column; gap:12px; overflow:visible; }
+    .calendar-pane{ position:absolute; right:40px; top:80px; bottom:170px; width:min(360px, 36%); z-index:7; background:#fff; border-radius:20px; box-shadow: var(--shadow); border: 3px solid #1f2937; padding:14px 16px; overflow:visible; }
     .calendar-title{ font-family:"Fredoka","Nunito",system-ui,sans-serif; font-weight:800; margin:0 0 8px; font-size: clamp(18px,2.4vw,22px); }
     .calendar-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
     .cal-card{ background:#eef2ff; border:2px solid #312e81; border-radius:14px; padding:10px 12px; font-weight:800; cursor:pointer; }
@@ -83,6 +83,7 @@
     .input{ flex:1; height:48px; border:3px solid #1f2937; border-radius:16px; padding:10px 12px; font-family:"Nunito",system-ui,sans-serif; font-size:16px; box-shadow: 0 4px 0 #1f2937; }
     .send{ border:none; padding:12px 18px; border-radius:14px; cursor: pointer; background: linear-gradient(180deg, #60a5fa, #2563eb); color:#fff; font-weight:800; box-shadow:0 6px 0 #1e3a8a; align-self:flex-end; }
     .send:disabled{ cursor:default; filter: saturate(.2) brightness(.95); box-shadow:0 6px 0 #94a3b8; }
+    .chat-canvas{ background:#f8fbff; border:3px solid #1f2937; border-radius:22px; padding:12px; box-shadow: var(--shadow); display:flex; flex-direction:column; gap:10px; height:100%; }
   </style>
 </head>
 <body>
@@ -118,11 +119,13 @@
       </div>
 
       <div class="chat-wrap" id="chatWrap">
-        <div class="chat-header">💬 Friend — online</div>
-        <div class="chat" id="chat"></div>
-        <div class="composer-row">
+        <div class="chat-canvas">
+          <div class="chat-header">💬 Friend — online</div>
+          <div class="chat" id="chat"></div>
+          <div class="composer-row">
             <input class="input" id="textInput" type="text" placeholder="Type your reply..." autocomplete="off" />
             <button class="send" id="sendBtn" disabled>Send</button>
+          </div>
         </div>
       </div>
 
