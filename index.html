@@ -36,7 +36,7 @@
 
     /* Chat UI */
     .chat-wrap{ display:none; }
-    .chat{ flex:1; display:flex; flex-direction:column; gap:8px; min-height: 160px; background:transparent; border-radius: 10px; padding: 6px; overflow: visible; border:none; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
+    .chat{ flex:1; display:flex; flex-direction:column; gap:8px; min-height: 160px; background:transparent; border-radius: 10px; padding: 6px; overflow: auto; border:none; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
     .chat-header{ background:#111827; color:#fff; border:2px solid #1f2937; border-radius:14px; padding:8px 12px; font-weight:800; display:flex; align-items:center; gap:8px; }
     .bubble{ max-width: 78%; padding: 12px 14px; border-radius: 18px; line-height: 1.35; box-shadow: var(--shadow);} 
     .friend{ align-self:flex-start; background:#fff; border:2px solid #1f2937; position:relative; }
@@ -61,8 +61,8 @@
     /* ===== Scene 3 ===== */
     .scene3-wrap{ display:none; margin-top:8px; }
     .bg-stage3{ position: relative; width: 100%; min-height: 88vh; aspect-ratio: auto; border-radius: 18px; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; margin: clamp(4px, 1.2vw, 12px); }
-    .floating-chat{ position:absolute; left: 36px; top: 100px; bottom: 180px; width: min(460px, 44%); z-index: 6; display:flex; flex-direction:column; gap:10px; }
-    .calendar-pane{ position:absolute; right:36px; top:100px; bottom:auto; max-height: calc(100% - 190px); width:min(300px, 32%); z-index:7; background:#fff; border-radius:18px; box-shadow: var(--shadow); border: 3px solid #1f2937; padding:12px 14px 8px; }
+    .floating-chat{ position:absolute; left: 36px; top: 100px; bottom: 180px; width: min(560px, 58%); z-index: 6; display:flex; flex-direction:column; gap:10px; }
+    .calendar-pane{ position:absolute; right:36px; top:100px; bottom:auto; max-height: calc(100% - 190px); width:min(260px, 28%); z-index:7; background:#fff; border-radius:18px; box-shadow: var(--shadow); border: 2px solid rgba(17,24,39,.8); outline:1px solid rgba(17,24,39,.25); padding:12px 14px 8px; }
     .calendar-title{ font-family:"Fredoka","Nunito",system-ui,sans-serif; font-weight:800; margin:0 0 8px; font-size: clamp(18px,2.4vw,22px); }
     .calendar-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
     .cal-card{ background:#eef2ff; border:2px solid #312e81; border-radius:14px; padding:10px 12px; font-weight:800; cursor:pointer; }
@@ -143,11 +143,7 @@
 
       <div class="chat-wrap" id="chatWrap">
         <div class="chat-canvas">
-          <div class="chat-header">💬 Friend — online
-            <div class="header-actions">
-              <button class="icon-btn" id="themeToggle" title="Toggle theme">🌓</button>
-              <button class="icon-btn" id="fxToggle" title="Toggle sounds">🔈</button>
-            </div>
+          <div class="chat-header">💬 Friend — online</div>
           </div>
           <div class="chat" id="chat" role="log" aria-live="polite">  <div class="bubble typing" id="typing" style="display:none">Friend is typing…</div>
           </div>
@@ -247,23 +243,31 @@
     function closeModal(){ modal.classList.remove('open'); }
     if(grid){ grid.addEventListener('click', (e)=>{ const card = e.target.closest('.cal-card'); if(card){ const day = card.dataset.day; openPlan(day); const templ = templateFromDay(day); if(templ){ textInput.value = templ; updateSendDisabled(); } } }); }
     if(modalClose) modalClose.addEventListener('click', closeModal);
-    if(modal) modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); }); });
+    if(modal) modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
 
-    // ===== Chat typing logic =====
+    // ===== Chat typing logic + typing indicator (no sounds/theme) =====
+    const typing = document.getElementById('typing');
+    function showTyping(){ if(typing){ typing.style.display='block'; } }
+    function hideTyping(){ if(typing){ typing.style.display='none'; } }
+    function friendAutoReply(){ showTyping(); setTimeout(()=>{ hideTyping(); addBubble('Nice! See you then. 😊', 'friend'); }, 1200); }
+
     function sendMessage(){
       const val = (textInput.value || '').trim();
       if(!val) return;
       addBubble(val, 'me');
       textInput.value='';
       updateSendDisabled();
+      friendAutoReply();
     }
-    function updateSendDisabled(){
-      const has = (textInput.value||'').trim().length>0;
-      sendBtn.disabled = !has;
-    }
+    function updateSendDisabled(){ const has = (textInput.value||'').trim().length>0; sendBtn.disabled = !has; }
     sendBtn.addEventListener('click', sendMessage);
     textInput.addEventListener('input', updateSendDisabled);
     textInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); }});
+
+    function templateFromDay(day){
+      const map = { Wednesday: 'I am going to swimming.', Friday: 'I am studying math.', Sunday: 'I am going to the cinema.' };
+      return map[day] || '';
+    }
 
     // --- Tests (kept as-is, plus a small extra) ---
     (function chatTests(){
