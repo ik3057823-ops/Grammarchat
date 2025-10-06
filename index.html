@@ -2,391 +2,279 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Present Continuous Chat Game</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gamish Chat</title>
   <style>
     :root{
       --bg: #ffffff;
-      --ink: #1a1a1a;
-      --card: #fff;
-      --accent: #6d5efc;
-      --accent-2: #22c55e;
-      --accent-3: #f59e0b;
-      --shadow: 0 10px 25px rgba(0,0,0,.08);
-      --radius: 26px;
+      --card: #f3f4f6;
+      --ink: #111827; /* text */
+      --muted: #6b7280; /* secondary text */
+      --border: #e5e7eb; /* light border */
+      --bubble-me: #e5e7eb; /* light grey */
+      --bubble-them: #ffffff; /* white */
     }
-    html,body{height:100%}
-    body{ margin:0; background: var(--bg); color: var(--ink); font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-    .screen{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding: clamp(12px, 2.5vw, 28px); }
-    .card{ width:min(860px, 100%); background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: clamp(22px, 4vw, 44px); border: 4px solid #1f2937; position: relative; overflow: hidden; isolation:isolate; }
-    /* full-bleed mode for scenes 2 & 3: image fills card, only outer page padding remains */
-    .card.full-bleed{ padding:0; background:transparent; border:none; box-shadow:none; }
-    .card.full-bleed::before, .card.full-bleed::after{ display:none; }
-    .card::before, .card::after{ content:""; position:absolute; inset:auto auto -40px -40px; width:140px; height:140px; background: radial-gradient( circle at 30% 30%, var(--accent) 0 35%, transparent 36% ), radial-gradient( circle at 70% 70%, var(--accent-2) 0 35%, transparent 36% ), radial-gradient( circle at 75% 25%, var(--accent-3) 0 28%, transparent 29% ); opacity:.25; filter: blur(1px); transform: rotate(-12deg); z-index:-1; }
-    .card::after{ inset:-40px -40px auto auto; transform: rotate(18deg); }
-
-    .title{ font-family: "Fredoka", "Nunito", system-ui, sans-serif; font-size: clamp(28px, 4.6vw, 48px); line-height: 1.1; margin: 0 0 12px; letter-spacing: 0.5px; text-shadow: 0 2px 0 #ffffff, 0 4px 0 rgba(0,0,0,.1); }
-    .subtitle{ font-size: clamp(16px, 2.1vw, 20px); margin: 0 0 22px; }
-    .cta{ display:inline-block; border:none; cursor:pointer; font-family: "Fredoka", "Nunito", system-ui, sans-serif; font-weight: 800; letter-spacing: .4px; font-size: clamp(18px, 2.6vw, 22px); padding: 14px 26px; border-radius: 18px; background: linear-gradient(180deg, #ffd34d, #f59e0b); color: #111827; box-shadow: 0 8px 0 #111827, 0 12px 24px rgba(0,0,0,.15); transition: transform .12s ease, box-shadow .12s ease, filter .12s ease; }
-    .cta:hover{ transform: translateY(-2px); filter: brightness(1.03); }
-    .cta:active{ transform: translateY(2px); box-shadow: 0 4px 0 #111827; }
-
-    /* Chat UI */
-    .chat-wrap{ display:none; }
-    .chat{ flex:1; display:flex; flex-direction:column; gap:8px; min-height: 160px; background:transparent; border-radius: 10px; padding: 6px; overflow-y: auto; overflow-x: hidden; border:none; word-wrap: break-word; overflow-wrap: anywhere; white-space: normal; }
-    .chat-header{ background:#111827; color:#fff; border:2px solid #1f2937; border-radius:14px; padding:8px 12px; font-weight:800; display:flex; align-items:center; gap:8px; }
-    .bubble{ max-width: 78%; padding: 12px 14px; border-radius: 18px; line-height: 1.35; box-shadow: 0 6px 0 rgba(0,0,0,.25); border:3px solid #111827; position:relative; }
-    .friend{ align-self:flex-start; background: linear-gradient(180deg,#fff7c2,#fde68a); }
-    .friend::after{ content:""; position:absolute; left:-10px; bottom:10px; width:18px; height:18px; background: inherit; border-left:3px solid #111827; border-bottom:3px solid #111827; transform: rotate(45deg); border-bottom-left-radius:6px; }
-    .me{ align-self:flex-end; background: linear-gradient(180deg,#c7f9e5,#86efac); border:3px solid #111827; position:relative; }
-    .me::after{ content:""; position:absolute; right:-10px; bottom:10px; width:18px; height:18px; background: inherit; border-right:3px solid #111827; border-bottom:3px solid #111827; transform: rotate(-45deg); border-bottom-right-radius:6px; }
-    .hint{ font-size:14px; opacity:.8; }
-
-    .callout{ background:#eef2ff; border:2px solid #312e81; border-radius:16px; padding:14px 16px; margin:0 0 24px; font-weight:700; }
-    .callout em{ font-style:normal; font-weight:800; }
-
-    /* ===== Scene 2 ===== */
-    .scene2-wrap{ display:none; margin-top: 8px; }
-    .bg-stage{ position: relative; width: 100%; min-height: 85vh; aspect-ratio: auto; border-radius: 18px; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; margin: clamp(4px, 1.2vw, 12px); }
-    .overlay-instruction{ position: absolute; left: 14px; bottom: 14px; z-index: 5; display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 18px; font-family: "Fredoka", "Nunito", system-ui, sans-serif; font-weight: 800; letter-spacing: .4px; font-size: clamp(16px, 2.2vw, 20px); background: linear-gradient(180deg, #ffd34d, #f59e0b); color: #111827; box-shadow: 0 8px 0 #111827, 0 12px 24px rgba(0,0,0,.15); }
-    .overlay-instruction.pulse{ animation: throb 1s ease-in-out infinite; }
-    @keyframes throb { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
-    .screen-hotspot{ position: absolute; inset: 18% 28% 28% 28%; cursor: pointer; }
-
-    .card.no-outline{ border: none; }
-
-    /* ===== Scene 3 ===== */
-    .scene3-wrap{ display:none; margin-top:8px; }
-    .bg-stage3{ position: relative; width: 100%; min-height: 88vh; aspect-ratio: auto; border-radius: 18px; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; margin: clamp(4px, 1.2vw, 12px); }
-    .floating-chat{ position:absolute; left: 36px; top: 100px; bottom: 180px; width: min(480px, 52%); z-index: 6; display:flex; flex-direction:column; gap:10px; }
-    .calendar-pane{ position:absolute; right:36px; top:100px; bottom:auto; max-height: calc(100% - 190px); width:min(260px, 28%); z-index:7; background:#fff; border-radius:18px; box-shadow: var(--shadow); border: 2px solid rgba(17,24,39,.8); outline:1px solid rgba(17,24,39,.25); padding:12px 14px 8px; }
-    .calendar-title{ font-family:"Fredoka","Nunito",system-ui,sans-serif; font-weight:800; margin:0 0 8px; font-size: clamp(18px,2.4vw,22px); }
-    .calendar-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
-    .cal-card{ background:#eef2ff; border:2px solid #312e81; border-radius:14px; padding:10px 12px; font-weight:800; cursor:pointer; }
-
-    @media (max-width: 820px){ .floating-chat{ width: 62%; } .calendar-pane{ width: 36%; } }
-    @media (max-width: 640px){ .bg-stage3{ aspect-ratio:auto; min-height: 520px; } .floating-chat{ position: absolute; left: 12px; right: 12px; width:auto; } .calendar-pane{ position:absolute; right:12px; left:12px; top:auto; bottom:12px; width:auto; } }
-
-    /* Modal */
-    .modal{ position: fixed; inset:0; background: rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50; }
-    .modal.open{ display:flex; }
-    .modal-card{ width:min(460px, 92vw); background:#fff; border:4px solid #1f2937; border-radius:22px; box-shadow: var(--shadow); padding:18px 20px; }
-    .modal-title{ font-family:"Fredoka","Nunito",system-ui,sans-serif; font-size: clamp(18px, 2.6vw, 24px); margin:0 0 8px; }
-    .modal-actions{ display:flex; justify-content:flex-end; margin-top:12px; }
-    .btn{ display:inline-block; border:none; cursor:pointer; font-family:"Fredoka","Nunito",system-ui,sans-serif; font-weight:800; padding:10px 16px; border-radius:14px; box-shadow: 0 6px 0 #111827; background: linear-gradient(180deg, #ffd34d, #f59e0b); }
-
-    /* Chat composer (typing) */
-    .composer-row{ display:flex; align-items:center; gap:10px; margin-top:6px; margin-bottom:0; }
-    .input{ flex:1; height:48px; border:3px solid #1f2937; border-radius:16px; padding:10px 12px; font-family:"Nunito",system-ui,sans-serif; font-size:16px; box-shadow: 0 4px 0 #1f2937; }
-    .send{ border:none; padding:12px 18px; border-radius:14px; cursor: pointer; background: linear-gradient(180deg, #60a5fa, #2563eb); color:#fff; font-weight:800; box-shadow:0 6px 0 #1e3a8a; align-self:flex-end; }
-    .send:disabled{ cursor:default; filter: saturate(.2) brightness(.95); box-shadow:0 6px 0 #94a3b8; }
-    .chat-canvas{ position:relative; background:#f8fbff; border:2px solid rgba(17,24,39,.8); outline:1px solid rgba(17,24,39,.25); border-radius:20px; padding:10px; box-shadow: 0 10px 22px rgba(0,0,0,.15); display:flex; flex-direction:column; gap:8px; height:100%; }
-    /* Snap-to-desktop look for calendar */
-    .calendar-pane{ box-shadow: 0 10px 22px rgba(0,0,0,.15); outline:1px solid rgba(17,24,39,.25); }
-    /* Bubble entrance */
-    @keyframes popIn{0%{transform:scale(.96) translateY(6px); opacity:.0}100%{transform:scale(1) translateY(0); opacity:1}}
-    .bubble{ animation: popIn .22s ease-out; }
-    /* Typing indicator */
-    .typing{ align-self:flex-start; background:#fff; border:2px dashed #64748b; font-style:italic; opacity:.9; }
-    .new-badge{ position:absolute; right:12px; bottom:56px; padding:6px 10px; font-weight:800; border-radius:12px; border:2px solid #111827; background:#fff07a; box-shadow:0 4px 0 #111827; }
-    /* Calendar toggle (mobile FAB) */
-    .cal-fab{ position:absolute; right:24px; bottom:140px; z-index:9; display:none; width:52px; height:52px; border-radius:50%; border:2px solid #111827; background:#fff07a; box-shadow:0 8px 0 #111827; font-weight:900; font-size:22px; cursor:pointer; }
-    .cal-fab:focus{ outline:3px solid #60a5fa; outline-offset:2px; }
-    @media (max-width: 900px){
-    .cal-fab{ display:inline-flex; align-items:center; justify-content:center; }
-    .calendar-pane{ display:none; }
-    /* Small overlay calendar when opened from the FAB */
-    .calendar-pane.open{ display:block; position:absolute; left:auto; right:20px; top: 100px; bottom: auto; width: min(320px, 70vw); max-height: calc(100% - 220px); }
-    .floating-chat{ left: 20px; right: 20px; width:auto; top: 80px; bottom: 170px; }
-  }
-    .calendar-pane{ display:none; }
-    .calendar-pane.open{ display:block; left:20px; right:20px; top: 100px; bottom: 120px; max-height:none; width:auto; }
-    .floating-chat{ left: 20px; right: 20px; width:auto; top: 80px; bottom: 170px; }
-  }
-      .floating-chat{ position:absolute; left: max(12px, env(safe-area-inset-left) + 12px); right: max(12px, env(safe-area-inset-right) + 12px); width:auto; top: 90px; bottom: 160px; }
-      /* Calendar is hidden by default; when opened, it overlays nicely inside the desktop with spacing */
-      .calendar-pane{ display:none; position:absolute; left: max(12px, env(safe-area-inset-left) + 12px); right: max(12px, env(safe-area-inset-right) + 12px); top: 96px; bottom: 160px; width:auto; max-height:none; z-index: 20; }
-      .calendar-pane.open{ display:block; }
-      /* Larger touch targets and readable spacing */
-      .cal-card{ padding:14px 16px; }
-      .composer-row{ position: sticky; bottom: 0; background: #f8fbff; padding-bottom:8px; border-top:1px solid rgba(0,0,0,.06); }
-      /* FAB shows only on mobile */
-      .cal-fab{ display:inline-flex; align-items:center; justify-content:center; bottom: 132px; right: max(16px, env(safe-area-inset-right) + 12px); }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background: var(--bg); color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
+      min-height:100svh; display:grid; place-items:center; padding:clamp(16px,3vw,48px);
     }
-      .calendar-pane{ display:none; }
-      .calendar-pane.open{ display:block; left:20px; right:20px; top: 100px; bottom: 120px; max-height:none; width:auto; }
-      .floating-chat{ left: 20px; right: 20px; width:auto; top: 80px; bottom: 170px; }
+
+    .chat-wrap{ width:min(92vw, 880px); display:grid; place-items:center; }
+
+    .chat-card{
+      width:min(92vw, 520px); max-height:80svh;
+      background: linear-gradient(180deg, #fafafa 0%, var(--card) 100%);
+      border-radius:20px; overflow:hidden; position:relative;
+      box-shadow: 0 12px 32px rgba(0,0,0,.08), inset 0 0 0 2px var(--border);
     }
+
+    .header{
+      position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between;
+      padding:12px 14px; background:#ffffff; border-bottom:2px solid var(--border);
+    }
+    .tab{
+      display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:#fff; border:2px solid var(--border);
+    }
+    .avatar{
+      width:28px; height:28px; border-radius:6px; background:#e5e7eb; display:inline-grid; place-items:center; color:#374151; font-weight:700; font-size:13px;
+      box-shadow: inset 0 0 0 2px #d1d5db;
+    }
+    .name{color:#111827; font-weight:700; letter-spacing:.15px}
+    .sub{color:var(--muted); font-size:12px}
+    .icons{display:flex; align-items:center; gap:8px}
+    .icon-btn{
+      width:36px; height:36px; display:grid; place-items:center; border-radius:10px; background:#fff; border:2px solid var(--border); color:#374151; cursor:pointer;
+      transition: transform .1s ease, box-shadow .1s ease;
+    }
+    .icon-btn:hover{ transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,.08)}
+
+    .level-badge{
+      position:absolute; right:14px; top:54px; z-index:2; background:#fff; border:2px solid var(--border); color:#374151;
+      padding:3px 8px; font-size:11px; border-radius:999px; letter-spacing:.3px
+    }
+
+    .xp{ position:relative; height:8px; margin:0 14px; background:#eceff1; border:2px solid var(--border); border-radius:999px; overflow:hidden; }
+    .xp>span{ position:absolute; inset:0; width:52%; background:#9ca3af; }
+
+    .messages{ height: calc(80svh - 56px - 68px);
+      max-height:520px; overflow:auto; padding:16px 14px 10px; scroll-behavior:smooth; color:var(--ink);
+      background: linear-gradient(180deg,#fff, #f7f7f7);
+    }
+    .msg{ display:flex; gap:6px; margin:8px 0; align-items:flex-end; }
+    .msg.me{ flex-direction: row-reverse; }
+    .bubble{$1border:2px solid var(--border);
+    }
+    @keyframes pop{ to{ transform: translateY(0); }}
+    .me .bubble{ background: var(--bubble-me); color:#111827; box-shadow: 0 2px 6px rgba(0,0,0,.06)}
+    .them .bubble{ background: var(--bubble-them); color:#111827; box-shadow: 0 2px 6px rgba(0,0,0,.05)}
+    .meta{ font-size:11px; color: var(--muted); margin-top:4px }
+    .stamp{ opacity:.9 }
+
+    .input{
+      display:flex; gap:10px; align-items:center; padding:10px 12px 14px; background:#f8fafc; border-top:2px solid var(--border)
+    }
+    .textbox{
+      flex:1; display:flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--border); border-radius:12px; padding:10px 12px;
+    }
+    .textbox input{ flex:1; background:transparent; color:#111827; outline:none; border:none; font-size:14px }
+    .send{
+      min-width:84px; padding:10px 14px; border:2px solid #d1d5db; border-radius:12px; color:#111827; cursor:pointer; font-weight:700; letter-spacing:.3px;
+      background: linear-gradient(180deg,#f9fafb,#e5e7eb); box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      transition: transform .08s ease, filter .08s ease
+    }
+    .send:hover{ transform: translateY(-1px) }
+
+    .typing{ display:none; align-items:center; gap:8px; color:#6b7280; font-size:13px; margin:8px 0 0 6px }
+    .dots{ display:inline-flex; gap:3px }
+    .dots span{ width:6px; height:6px; border-radius:50%; background:#9ca3af; opacity:.6; animation: blink 1s infinite ease-in-out }
+    .dots span:nth-child(2){ animation-delay:.2s }
+    .dots span:nth-child(3){ animation-delay:.4s }
+    @keyframes blink{ 50%{ opacity:1 } }
+
+    .tooltip{ position:absolute; top:48px; right:12px; background:#fff; border:2px solid var(--border); border-radius:10px; box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      display:none; min-width:180px; color:#111827 }
+    .tooltip.show{ display:block }
+    .tooltip .row{ display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer }
+    .tooltip .row:hover{ background:#f3f4f6 }
+    .tooltip svg{ color:#374151 }
+
+    .phone.show, .calendar.show{ display:block }
+
+    .icon-btn:focus-visible, .send:focus-visible, .textbox input:focus-visible{ outline: 2px solid #9ca3af; outline-offset: 2px }
+
+    .pad{ height:18px }
   </style>
 </head>
 <body>
-  <main class="screen">
-    <section class="card" id="scene">
-      <h1 class="title">Chat & Practice: Present Continuous</h1>
-      <p class="subtitle">In this mini‑game, you’ll <strong>chat with a friendly partner</strong> and practice the <em>present continuous</em> (am/are/is + verb‑ing).</p>
-      <div class="callout">Practice the <em>present continuous</em> by chatting in real time. Use your knowledge of present continuous to reply to your friend.</div>
-      <button class="cta" id="start">▶ Start</button>
+  <div class="chat-wrap">
+    <div class="chat-card" role="application" aria-label="Chat window">
+      <div class="header">
+        <div class="tab" aria-label="Contact tab">
+          <div class="avatar" aria-hidden="true">AS</div>
+          <div>
+            <div class="name">Ava Stone</div>
+            <div class="sub">Online • Level 5</div>
+          </div>
+        </div>
+        <div class="icons">
+          <button class="icon-btn" id="phoneBtn" title="Call">
+            <!-- phone icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.24c1.1.37 2.29.56 3.6.56a1 1 0 011 1v3.2a1 1 0 01-1 1C11.2 21.72 2.28 12.8 2.28 2.6a1 1 0 011-1H6.4a1 1 0 011 1c0 1.31.19 2.5.56 3.6a1 1 0 01-.24 1l-2.12 2.6z" fill="currentColor"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="calBtn" title="Schedule">
+            <!-- calendar icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M7 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 112 0v1zm13 7H4v10h16V9z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+        
+      </div>
 
-      <div class="scene2-wrap" id="scene2">
-        <div class="bg-stage" id="bgStage" style="background-image:url('https://raw.githubusercontent.com/ik3057823-ops/media/refs/heads/main/bedroom%20(1).png');">
-          <div class="screen-hotspot" id="screenHotspot" title="Click the computer screen to start!"></div>
-          <div class="overlay-instruction pulse" id="overlayInstruction">💡 Click on the computer screen to start!</div>
+      
+
+      <div class="messages" id="messages" aria-live="polite">
+        <div class="msg them">
+          <div class="avatar" aria-hidden="true">AS</div>
+          <div>
+            <div class="bubble">Welcome! Ready to quest for knowledge today?</div>
+            <div class="meta"><span class="stamp">09:41</span> · <span>Lvl 5</span></div>
+          </div>
+        </div>
+        <div class="msg me">
+          <div class="avatar" aria-hidden="true">ME</div>
+          <div>
+            <div class="bubble">Absolutely! What are today’s challenges?</div>
+            <div class="meta"><span class="stamp">09:42</span> · <span>Streak ×3</span></div>
+          </div>
+        </div>
+        <div class="typing" id="typing"><strong>Ava</strong>
+          <span class="dots" aria-hidden="true"><span></span><span></span><span></span></span>
         </div>
       </div>
 
-      <div class="scene3-wrap" id="scene3">
-        <div class="bg-stage3" id="bgStage3" style="background-image:url('https://raw.githubusercontent.com/ik3057823-ops/media/refs/heads/main/windows.png');">
-          <button class="cal-fab" id="calFab" aria-label="Open calendar" aria-controls="calendarPane" aria-expanded="false">📅</button>
-          <div class="calendar-pane" id="calendarPane" aria-live="polite">
-            <h3 class="calendar-title">📅 This Week</h3>
-            <div class="calendar-grid" id="calendarGrid">
-              <div class="cal-card" data-day="Monday">Monday</div>
-              <div class="cal-card" data-day="Tuesday">Tuesday</div>
-              <div class="cal-card" data-day="Wednesday">Wednesday</div>
-              <div class="cal-card" data-day="Thursday">Thursday</div>
-              <div class="cal-card" data-day="Friday">Friday</div>
-              <div class="cal-card" data-day="Saturday">Saturday</div>
-              <div class="cal-card" data-day="Sunday">Sunday</div>
-            </div>
-          </div>
+      <div class="input">
+        <div class="textbox">
+          <!-- paper icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M21 15V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14l4-4h10a2 2 0 002-2z" fill="currentColor"/>
+          </svg>
+          <input id="input" type="text" placeholder="Type your message…" autocomplete="off" />
         </div>
+        <button class="send" id="send">Send</button>
       </div>
 
-      <div class="chat-wrap" id="chatWrap">
-        <div class="chat-canvas">
-          <div class="chat-header">💬 Friend — online</div>
-          <button class="new-badge" id="newBadge" style="display:none">New messages</button>
-          <div class="chat" id="chat" role="log" aria-live="polite">
-            <div class="bubble typing" id="typing" style="display:none">Friend is typing…</div>
-          </div>
-          <div class="composer-row">
-            <input class="input" id="textInput" type="text" placeholder="Type your reply..." autocomplete="off" />
-            <button class="send" id="sendBtn" disabled>Send</button>
-          </div>
+      <!-- Action tooltips -->
+      <div class="tooltip phone" id="phoneTip" role="dialog" aria-label="Phone menu">
+        <div class="row" onclick="alert('Calling Ava…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.24c1.1.37 2.29.56 3.6.56a1 1 0 011 1v3.2a1 1 0 01-1 1C11.2 21.72 2.28 12.8 2.28 2.6a1 1 0 011-1H6.4a1 1 0 011 1c0 1.31.19 2.5.56 3.6a1 1 0 01-.24 1l-2.12 2.6z" fill="currentColor"/></svg>
+          <span>Start voice call</span>
+        </div>
+        <div class="row" onclick="alert('Sending voice note…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3a4 4 0 00-4 4v6a4 4 0 108 0V7a4 4 0 00-4-4zm-6 7a1 1 0 011 1v2a7 7 0 0014 0v-2a1 1 0 112 0v2a9 9 0 01-18 0v-2a1 1 0 011-1z" fill="currentColor"/></svg>
+          <span>Send voice note</span>
         </div>
       </div>
-
-    </section>
-
-    <div class="modal" id="planModal" aria-modal="true" role="dialog" aria-labelledby="modalTitle">
-      <div class="modal-card">
-        <h3 class="modal-title" id="modalTitle">Day</h3>
-        <p id="modalBody">Plan details…</p>
-        <div class="modal-actions"><button class="btn" id="modalClose">Close</button></div>
+      <div class="tooltip calendar" id="calTip" role="dialog" aria-label="Calendar menu">
+        <div class="row" onclick="alert('Opening calendar…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 112 0v1zm13 7H4v10h16V9z" fill="currentColor"/></svg>
+          <span>Create meeting</span>
+        </div>
+        <div class="row" onclick="alert('Sharing availability…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v14l-4-3H6a2 2 0 01-2-2V5z" fill="currentColor"/></svg>
+          <span>Share availability</span>
+        </div>
       </div>
     </div>
-  </main>
-
-  <audio id="bgm" loop>
-    <source src="https://raw.githubusercontent.com/ik3057823-ops/media/refs/heads/main/daytime-farm-ambience-409990.mp3" type="audio/mpeg">
-  </audio>
+  </div>
 
   <script>
-    const startBtn = document.getElementById('start');
-    const scene = document.getElementById('scene');
-    const chatWrap = document.getElementById('chatWrap');
-    const chat = document.getElementById('chat');
-    const sendBtn = document.getElementById('sendBtn');
-    const textInput = document.getElementById('textInput');
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    const typingEl = document.getElementById('typing');
 
-    const scene2 = document.getElementById('scene2');
-    const bgStage = document.getElementById('bgStage');
-    const hotspot = document.getElementById('screenHotspot');
-    const overlayInstruction = document.getElementById('overlayInstruction');
-    const scene3 = document.getElementById('scene3');
-    const bgStage3 = document.getElementById('bgStage3');
-    const calFab = document.getElementById('calFab');
-    const bgm = document.getElementById('bgm');
+    const phoneBtn = document.getElementById('phoneBtn');
+    const calBtn = document.getElementById('calBtn');
+    const phoneTip = document.getElementById('phoneTip');
+    const calTip = document.getElementById('calTip');
 
-    function show(el){ if(el) el.style.display='block'; }
-    function hide(el){ if(el) el.style.display='none'; }
+    function toggleTip(tip){
+      tip.classList.toggle('show');
+      // Close the other tooltip if open
+      if(tip === phoneTip) calTip.classList.remove('show');
+      if(tip === calTip) phoneTip.classList.remove('show');
+    }
+    phoneBtn.addEventListener('click', ()=> toggleTip(phoneTip));
+    calBtn.addEventListener('click', ()=> toggleTip(calTip));
+    document.addEventListener('click', (e)=>{
+      if(!e.target.closest('.icon-btn') && !e.target.closest('.tooltip')){
+        phoneTip.classList.remove('show');
+        calTip.classList.remove('show');
+      }
+    });
 
-    function addBubble(text, who='friend'){
-      const b = document.createElement('div');
-      b.className = `bubble ${who}`;
-      b.textContent = text;
-      chat.appendChild(b);
-      const atBottom = isAtBottom();
-      if(atBottom){ scrollToBottom(); } else { bumpUnseen(); }
+    function addMessage(text, who='me'){
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${who}`;
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.textContent = who === 'me' ? 'ME' : 'AS';
+      const box = document.createElement('div');
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = text;
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const now = new Date();
+      const hh = now.getHours().toString().padStart(2,'0');
+      const mm = now.getMinutes().toString().padStart(2,'0');
+      meta.innerHTML = `<span class="stamp">${hh}:${mm}</span> · <span>${who==='me'?'Streak ×3':'Lvl 5'}</span>`;
+      box.appendChild(bubble); box.appendChild(meta);
+      wrap.appendChild(avatar); wrap.appendChild(box);
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    const firstQuestion = "Hi! What are you doing on Wednesday?";
-
-    function startGame(){
-      // Hide intro content and show image scene
-      startBtn.remove();
-      document.querySelectorAll('.title, .subtitle, .callout').forEach(el=>{ if(el) el.style.display = 'none'; });
-      scene.classList.add('no-outline');
-      scene.classList.add('full-bleed');
-      show(scene2);
-      try {
-        bgm.volume = 0.7;
-        const p = bgm.play();
-        if(p && p.catch){ p.catch(()=>{}); }
-      } catch(e) {}
+    function botReply(userText){
+      const replies = [
+        "Nice! Claim +10 XP for curiosity.",
+        "Challenge accepted. Ready for a mini boss?",
+        "Pro tip: use combos — ask, test, iterate.",
+        "That unlocks a new hint. Want it?",
+        "Sweet! Adding this to your quest log."
+      ];
+      const pick = replies[Math.floor(Math.random()*replies.length)];
+      typingEl.style.display = 'flex';
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      setTimeout(()=>{
+        typingEl.style.display = 'none';
+        addMessage(pick, 'them');
+      }, 700 + Math.random()*600);
     }
-    startBtn.addEventListener('click', startGame);
 
-    function enterScene3(){
-      scene.classList.add('full-bleed');
-      hide(scene2);
-      show(scene3);
-      if(chatWrap && !chatWrap.classList.contains('floating-chat')){
-        chatWrap.classList.add('floating-chat');
-        if(bgStage3){ bgStage3.appendChild(chatWrap); }
-      }
-      show(chatWrap);
-      if(chat && chat.children.length===0){ addBubble(firstQuestion, 'friend'); }
-      if(overlayInstruction) overlayInstruction.classList.remove('pulse');
-      try {
-        const p = bgm.play();
-        if(p && p.catch){ p.catch(()=>{}); }
-      } catch(e) {}
-    }
-    hotspot.addEventListener('click', enterScene3);
-    bgStage.addEventListener('click', enterScene3);
-
-    // ===== Calendar plans & modal =====
-    const plans = { Monday: "No plan yet.", Tuesday: "No plan yet.", Wednesday: "going to swimming", Thursday: "No plan yet.", Friday: "studying math", Saturday: "No plan yet.", Sunday: "going to the cinema" };
-    const grid = document.getElementById('calendarGrid');
-    const modal = document.getElementById('planModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalBody = document.getElementById('modalBody');
-    const modalClose = document.getElementById('modalClose');
-    function openPlan(day){ modalTitle.textContent = day; modalBody.textContent = plans[day] || 'No plan yet.'; modal.classList.add('open'); }
-    function closeModal(){ modal.classList.remove('open'); }
-    if(grid){ grid.addEventListener('click', (e)=>{ const card = e.target.closest('.cal-card'); if(card){ const day = card.dataset.day; openPlan(day); const templ = templateFromDay(day); if(templ){ textInput.value = templ; updateSendDisabled(); } } }); }
-    if(modalClose) modalClose.addEventListener('click', closeModal);
-    if(modal) modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
-
-    // Mobile calendar toggle + enhance calendar click
-    (function mobileCalendar(){
-      const calendarPane = document.getElementById('calendarPane');
-      if(calFab && calendarPane){
-        calFab.addEventListener('click', ()=>{
-          const open = calendarPane.classList.toggle('open');
-          calFab.setAttribute('aria-expanded', String(open));
-        });
-      }
-      const grid = document.getElementById('calendarGrid');
-      if(grid && !grid.__boundMobile){
-        grid.addEventListener('click', (e)=>{
-          const card = e.target.closest('.cal-card');
-          if(!card) return;
-          const day = card.dataset.day;
-          const templ = templateFromDay(day);
-          if(templ){ textInput.value = templ; updateSendDisabled(); }
-          if(window.matchMedia && window.matchMedia('(max-width: 900px)').matches && calendarPane){
-            calendarPane.classList.remove('open');
-            if(calFab) calFab.setAttribute('aria-expanded','false');
-          }
-        });
-        grid.__boundMobile = true;
-      }
-    })();
-
-    // ===== Chat typing logic + typing indicator (no sounds/theme) =====
-    const typing = document.getElementById('typing');
-    const newBadge = document.getElementById('newBadge');
-    function showTyping(){ if(typing){ typing.style.display='block'; } }
-    function hideTyping(){ if(typing){ typing.style.display='none'; } }
-    function friendAutoReply(){ showTyping(); setTimeout(()=>{ hideTyping(); addBubble('Nice! See you then. 😊', 'friend'); }, 1200); }
-
-    function isAtBottom(){ return (chat.scrollHeight - chat.scrollTop - chat.clientHeight) < 4; }
-    function scrollToBottom(){ chat.scrollTop = chat.scrollHeight; hideBadge(); unseen=0; }
-    let unseen = 0;
-    function bumpUnseen(){ unseen++; if(newBadge){ newBadge.style.display='inline-block'; newBadge.textContent = unseen>1? `${unseen} new messages` : 'New message'; } }
-    function hideBadge(){ if(newBadge){ newBadge.style.display='none'; } }
-
-    chat.addEventListener('scroll', ()=>{ if(isAtBottom()){ hideBadge(); unseen=0; } });
-    if(newBadge){ newBadge.addEventListener('click', scrollToBottom); }
-
-    function sendMessage(){
-      const val = (textInput.value || '').trim();
+    function handleSend(){
+      const val = inputEl.value.trim();
       if(!val) return;
-      addBubble(val, 'me');
-      textInput.value='';
-      updateSendDisabled();
-      friendAutoReply();
-    }
-    function updateSendDisabled(){ const has = (textInput.value||'').trim().length>0; sendBtn.disabled = !has; }
-    sendBtn.addEventListener('click', sendMessage);
-    textInput.addEventListener('input', updateSendDisabled);
-    textInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); }});
-
-    function templateFromDay(day){
-      const map = { Wednesday: 'I am going to swimming.', Friday: 'I am studying math.', Sunday: 'I am going to the cinema.' };
-      return map[day] || '';
+      addMessage(val, 'me');
+      inputEl.value = '';
+      botReply(val);
     }
 
-    // --- Tests (kept as-is, plus a small extra) ---
-    (function chatTests(){
-      try{
-        const input = document.getElementById('textInput');
-        const btn = document.getElementById('sendBtn');
-        console.assert(input && btn, 'Chat input or send button missing');
-        input.value = 'I am going to swimming.'; input.dispatchEvent(new Event('input'));
-        console.assert(btn.disabled === false, 'Send should enable when there is text');
-        btn.click();
-        const last = chat.lastElementChild?.textContent || '';
-        console.assert(last.includes('I am going to swimming.'), 'Message did not send to chat');
-      }catch(e){ console.warn('Chat test error:', e); }
-    })();
+    inputEl.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); handleSend(); }
+    });
+    sendBtn.addEventListener('click', handleSend);
 
-    (function inputEnableDisableTest(){
-      try{
-        const input = document.getElementById('textInput');
-        const btn = document.getElementById('sendBtn');
-        input.value=''; input.dispatchEvent(new Event('input'));
-        console.assert(btn.disabled === true, 'Send should be disabled for empty input');
-        input.value='hello'; input.dispatchEvent(new Event('input'));
-        console.assert(btn.disabled === false, 'Send should enable when text present');
-      }catch(e){ console.warn('Input enable/disable test error:', e); }
-    })();
-
-    (function uiTests(){
-      try{
-        console.assert(document.getElementById('start'), 'Start button missing');
-        console.assert(document.getElementById('scene2'), 'Scene 2 missing');
-        console.assert(document.getElementById('scene3'), 'Scene 3 missing');
-        const days = Array.from(document.querySelectorAll('#calendarGrid .cal-card')).map(n=>n.textContent.trim());
-        console.assert(days.length === 7, 'Expected 7 days in the calendar');
-        console.assert(plans['Wednesday']?.toLowerCase().includes('going to swimming'), 'Wednesday plan mismatch');
-        console.assert(plans['Friday']?.toLowerCase().includes('studying math'), 'Friday plan mismatch');
-        console.assert(plans['Sunday']?.toLowerCase().includes('going to the cinema'), 'Sunday plan mismatch');
-        // Structure: chat and composer should be inside chat-canvas
-        const canvas = document.querySelector('#chatWrap .chat-canvas');
-        const chatEl = document.getElementById('chat');
-        console.assert(canvas && canvas.contains(chatEl), 'Chat should be inside chat-canvas');
-      }catch(e){ console.warn('UI test error:', e); }
-    })();
-
-    (function layoutTests(){
-      try{
-        const stage = document.getElementById('bgStage3');
-        const chatWrapEl = document.getElementById('chatWrap');
-        const cal = document.getElementById('calendarPane');
-        if(stage && chatWrapEl && cal){
-          const s = stage.getBoundingClientRect();
-          const c = chatWrapEl.getBoundingClientRect();
-          const k = cal.getBoundingClientRect();
-          const within = (a,b)=> a.left>=b.left-2 && a.top>=b.top-2 && a.right<=b.right+2 && a.bottom<=b.bottom+2;
-          console.assert(within(c,s), 'Chat panel is overflowing the scene');
-          console.assert(within(k,s), 'Calendar panel is overflowing the scene');
-        }
-      }catch(e){ console.warn('Layout test error:', e); }
-    })();
-
-    (function audioElementTests(){
-      try{
-        const audio = document.getElementById('bgm');
-        console.assert(!!audio, 'Background audio element is missing');
-        console.assert(typeof audio.play === 'function', 'Audio element does not support play()');
-      }catch(e){ console.warn('Audio element test error:', e); }
-    })();
+    // Accessibility: announce new messages
+    const observer = new MutationObserver(()=>{
+      messagesEl.setAttribute('aria-live','polite');
+    });
+    observer.observe(messagesEl, { childList:true });
   </script>
 </body>
 </html>
