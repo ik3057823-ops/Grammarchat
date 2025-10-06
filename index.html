@@ -23,67 +23,57 @@
 
     .chat-wrap{ width:min(92vw, 880px); display:grid; place-items:center; }
 
+    /* Stylish thick border using gradient border + subtle inner ring */
     .chat-card{
       width:min(92vw, 520px); max-height:80svh;
-      background: linear-gradient(180deg, #fafafa 0%, var(--card) 100%);
-      border-radius:20px; overflow:hidden; position:relative;
-      box-shadow: 0 12px 32px rgba(0,0,0,.08), inset 0 0 0 2px var(--border);
+      background: linear-gradient(#fafafa, var(--card)) padding-box,
+                  linear-gradient(135deg, #1f2937, #4b5563) border-box;
+      border:4px solid transparent; border-radius:20px; overflow:hidden; position:relative;
+      box-shadow: 0 16px 40px rgba(0,0,0,.10), inset 0 0 0 2px var(--border);
+    }
+    .chat-card::after{ /* soft inner shadow to give depth without heaviness */
+      content:""; position:absolute; inset:0; pointer-events:none; border-radius:20px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(0,0,0,.05);
     }
 
     .header{
-      position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:3; display:flex; align-items:center; justify-content:space-between;
       padding:12px 14px; background:#ffffff; border-bottom:2px solid var(--border);
     }
     .tab{
-      display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:#fff; border:2px solid var(--border);
+      display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:12px; background:#fff; border:2px solid var(--border);
     }
-    .avatar{
-      width:28px; height:28px; border-radius:6px; background:#e5e7eb; display:inline-grid; place-items:center; color:#374151; font-weight:700; font-size:13px;
-      box-shadow: inset 0 0 0 2px #d1d5db;
-    }
+    .avatar{ width:36px; height:36px; border-radius:8px; background:#e5e7eb; display:inline-grid; place-items:center; color:#374151; font-weight:700; font-size:14px; box-shadow: inset 0 0 0 2px #d1d5db; }
     .name{color:#111827; font-weight:700; letter-spacing:.15px}
     .sub{color:var(--muted); font-size:12px}
+
     .icons{display:flex; align-items:center; gap:8px}
-    .icon-btn{
-      width:36px; height:36px; display:grid; place-items:center; border-radius:10px; background:#fff; border:2px solid var(--border); color:#374151; cursor:pointer;
-      transition: transform .1s ease, box-shadow .1s ease;
-    }
+    .icon-btn{ width:44px; height:44px; display:grid; place-items:center; border-radius:12px; background:#fff; border:2px solid var(--border); color:#374151; cursor:pointer; transition: transform .1s ease, box-shadow .1s ease; }
+    .icon-btn svg{ width:22px; height:22px; }
     .icon-btn:hover{ transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,.08)}
-
-    .level-badge{
-      position:absolute; right:14px; top:54px; z-index:2; background:#fff; border:2px solid var(--border); color:#374151;
-      padding:3px 8px; font-size:11px; border-radius:999px; letter-spacing:.3px
-    }
-
-    .xp{ position:relative; height:8px; margin:0 14px; background:#eceff1; border:2px solid var(--border); border-radius:999px; overflow:hidden; }
-    .xp>span{ position:absolute; inset:0; width:52%; background:#9ca3af; }
 
     .messages{ height: calc(80svh - 56px - 68px);
       max-height:520px; overflow:auto; padding:16px 14px 10px; scroll-behavior:smooth; color:var(--ink);
       background: linear-gradient(180deg,#fff, #f7f7f7);
     }
-    .msg{ display:flex; gap:6px; margin:8px 0; align-items:flex-end; }
+    .msg{ display:flex; gap:4px; margin:8px 0; align-items:flex-end; }
     .msg.me{ flex-direction: row-reverse; }
-    .bubble{$1border:2px solid var(--border);
-    }
-    @keyframes pop{ to{ transform: translateY(0); }}
-    .me .bubble{ background: var(--bubble-me); color:#111827; box-shadow: 0 2px 6px rgba(0,0,0,.06)}
-    .them .bubble{ background: var(--bubble-them); color:#111827; box-shadow: 0 2px 6px rgba(0,0,0,.05)}
-    .meta{ font-size:11px; color: var(--muted); margin-top:4px }
+
+    /* WhatsApp-like bubbles with tails */
+    .bubble{ max-width:78%; padding:14px 16px; border-radius:18px; position:relative; line-height:1.5; font-size:16px; border:2px solid var(--border); background:#fff; }
+    .me .bubble{ background:#d9fdd3; border-color:#cfe9ba; border-radius:18px 18px 6px 18px; box-shadow: 0 2px 6px rgba(0,0,0,.06); }
+    .me .bubble::after{ content:""; position:absolute; right:-7px; bottom:0; width:14px; height:14px; background:#d9fdd3; border-right:2px solid #cfe9ba; border-bottom:2px solid #cfe9ba; border-bottom-right-radius:14px; transform: translateY(-3px) rotate(45deg); }
+    .them .bubble{ background:#ffffff; border-color:#e5e7eb; border-radius:18px 18px 18px 6px; box-shadow: 0 2px 6px rgba(0,0,0,.05); }
+    .them .bubble::after{ content:""; position:absolute; left:-7px; bottom:0; width:14px; height:14px; background:#ffffff; border-left:2px solid #e5e7eb; border-bottom:2px solid #e5e7eb; border-bottom-left-radius:14px; transform: translateY(-3px) rotate(-45deg); }
+
+    .meta{ font-size:11px; color: var(--muted); margin-top:2px }
     .stamp{ opacity:.9 }
 
-    .input{
-      display:flex; gap:10px; align-items:center; padding:10px 12px 14px; background:#f8fafc; border-top:2px solid var(--border)
-    }
-    .textbox{
-      flex:1; display:flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--border); border-radius:12px; padding:10px 12px;
-    }
+    .input{ display:flex; gap:10px; align-items:center; padding:10px 12px 14px; background:#f8fafc; border-top:2px solid var(--border) }
+    .textbox{ flex:1; display:flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--border); border-radius:12px; padding:10px 12px; }
     .textbox input{ flex:1; background:transparent; color:#111827; outline:none; border:none; font-size:14px }
-    .send{
-      min-width:84px; padding:10px 14px; border:2px solid #d1d5db; border-radius:12px; color:#111827; cursor:pointer; font-weight:700; letter-spacing:.3px;
-      background: linear-gradient(180deg,#f9fafb,#e5e7eb); box-shadow: 0 2px 8px rgba(0,0,0,.06);
-      transition: transform .08s ease, filter .08s ease
-    }
+    .send{ min-width:84px; padding:10px 14px; border:2px solid #d1d5db; border-radius:12px; color:#111827; cursor:pointer; font-weight:700; letter-spacing:.3px;
+      background: linear-gradient(180deg,#f9fafb,#e5e7eb); box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: transform .08s ease, filter .08s ease }
     .send:hover{ transform: translateY(-1px) }
 
     .typing{ display:none; align-items:center; gap:8px; color:#6b7280; font-size:13px; margin:8px 0 0 6px }
@@ -100,11 +90,40 @@
     .tooltip .row:hover{ background:#f3f4f6 }
     .tooltip svg{ color:#374151 }
 
-    .phone.show, .calendar.show{ display:block }
+    .phone.show{ display:block }
 
     .icon-btn:focus-visible, .send:focus-visible, .textbox input:focus-visible{ outline: 2px solid #9ca3af; outline-offset: 2px }
 
-    .pad{ height:18px }
+    /* Calendar overlay styles */
+    .calendar-overlay{ position:absolute; inset:0; background:#ffffff; display:none; z-index:5; overflow:hidden; }
+    .calendar-overlay.show{ display:block }
+    .cal-header{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:2px solid var(--border); }
+    .cal-title{ font-weight:800; color:#111827; letter-spacing:.2px }
+    .cal-month{ color:var(--muted); font-weight:600; font-size:12px; margin-top:2px }
+    .cal-actions{ display:flex; gap:8px; }
+    .cal-btn{ background:#fff; border:2px solid var(--border); border-radius:10px; padding:6px 10px; cursor:pointer; font-weight:700; }
+
+    /* Vertical, no-scroll weekly stack styled like the chat */
+    .cal-stack{ display:flex; flex-direction:column; gap:10px; padding:12px; height: calc(100% - 62px); /* header height */ }
+    .cal-item{ flex:1; min-height:0; display:grid; grid-template-columns: 8px 1fr; gap:10px; align-items:stretch; background:linear-gradient(#fff,#fafafa); border:2px solid var(--border); border-radius:14px; padding:10px 12px; position:relative; }
+    .cal-item::before{ content:""; display:block; border-radius:6px; background:#e5e7eb; }
+    .cal-item.today{ border-color:#9ca3af; box-shadow: inset 0 0 0 1px #d1d5db; }
+    .cal-item.today::before{ background:#9ca3af; }
+    .cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px }
+    .cal-dayname{ font-weight:800; font-size:14px; letter-spacing:.2px; color:#111827 }
+    .cal-date{ font-weight:700; font-size:12px; color:#6b7280 }
+    .cal-notes{ display:grid; gap:4px; align-content:center; }
+    .cal-note{ display:flex; gap:8px; align-items:flex-start; font-size:12px; color:#374151; line-height:1.35; }
+    .cal-bullet{ width:8px; height:8px; border-radius:50%; background:#d1d5db; margin-top:5px; flex:0 0 8px }
+
+    /* Footer bar */
+    .cal-footer{ display:flex; justify-content:flex-end; gap:8px; padding:10px 12px; border-top:2px solid var(--border) }
+    .cal-ghost{ background:#fff; border:2px solid var(--border); border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer }
+
+    @media (max-width: 640px){
+      .cal-dayname{font-size:13px}
+      .cal-note{font-size:11px}
+    }
   </style>
 </head>
 <body>
@@ -114,45 +133,61 @@
         <div class="tab" aria-label="Contact tab">
           <div class="avatar" aria-hidden="true">AS</div>
           <div>
-            <div class="name">Ava Stone</div>
-            <div class="sub">Online • Level 5</div>
+            <div class="name">Friend</div>
+            <div class="sub">Online</div>
           </div>
         </div>
         <div class="icons">
           <button class="icon-btn" id="phoneBtn" title="Call">
             <!-- phone icon -->
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.24c1.1.37 2.29.56 3.6.56a1 1 0 011 1v3.2a1 1 0 01-1 1C11.2 21.72 2.28 12.8 2.28 2.6a1 1 0 011-1H6.4a1 1 0 011 1c0 1.31.19 2.5.56 3.6a1 1 0 01-.24 1l-2.12 2.6z" fill="currentColor"/>
             </svg>
           </button>
-          <button class="icon-btn" id="calBtn" title="Schedule">
+          <button class="icon-btn" id="calBtn" title="Calendar">
             <!-- calendar icon -->
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M7 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 112 0v1zm13 7H4v10h16V9z" fill="currentColor"/>
             </svg>
           </button>
         </div>
-        
       </div>
 
-      
+      <!-- Calendar overlay (covers the entire chat card) -->
+      <div class="calendar-overlay" id="calOverlay" role="dialog" aria-modal="true" aria-label="Calendar">
+        <div class="cal-header">
+          <div>
+            <div class="cal-title">Calendar</div>
+            <div class="cal-month" id="calMonth">—</div>
+          </div>
+          <div class="cal-actions">
+            <button class="cal-btn" id="calPrev" aria-label="Previous week">‹</button>
+            <button class="cal-btn" id="calNext" aria-label="Next week">›</button>
+            <button class="cal-btn" id="calClose" aria-label="Close calendar">✕</button>
+          </div>
+        </div>
+        <div class="cal-stack" id="calStack" aria-live="polite"></div>
+        <div class="cal-footer">
+          <button class="cal-ghost" id="calDone">Done</button>
+        </div>
+      </div>
 
       <div class="messages" id="messages" aria-live="polite">
         <div class="msg them">
           <div class="avatar" aria-hidden="true">AS</div>
           <div>
             <div class="bubble">Welcome! Ready to quest for knowledge today?</div>
-            <div class="meta"><span class="stamp">09:41</span> · <span>Lvl 5</span></div>
+            <div class="meta"><span class="stamp">09:41</span></div>
           </div>
         </div>
         <div class="msg me">
           <div class="avatar" aria-hidden="true">ME</div>
           <div>
             <div class="bubble">Absolutely! What are today’s challenges?</div>
-            <div class="meta"><span class="stamp">09:42</span> · <span>Streak ×3</span></div>
+            <div class="meta"><span class="stamp">09:42</span></div>
           </div>
         </div>
-        <div class="typing" id="typing"><strong>Ava</strong>
+        <div class="typing" id="typing"><strong>Friend</strong>
           <span class="dots" aria-hidden="true"><span></span><span></span><span></span></span>
         </div>
       </div>
@@ -168,25 +203,11 @@
         <button class="send" id="send">Send</button>
       </div>
 
-      <!-- Action tooltips -->
+      <!-- Phone tooltip kept minimal -->
       <div class="tooltip phone" id="phoneTip" role="dialog" aria-label="Phone menu">
-        <div class="row" onclick="alert('Calling Ava…')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.24c1.1.37 2.29.56 3.6.56a1 1 0 011 1v3.2a1 1 0 01-1 1C11.2 21.72 2.28 12.8 2.28 2.6a1 1 0 011-1H6.4a1 1 0 011 1c0 1.31.19 2.5.56 3.6a1 1 0 01-.24 1l-2.12 2.6z" fill="currentColor"/></svg>
+        <div class="row" onclick="alert('Calling Friend…')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.24c1.1.37 2.29.56 3.6.56a1 1 0 011 1v3.2a1 1 0 01-1 1C11.2 21.72 2.28 12.8 2.28 2.6a1 1 0 011-1H6.4a1 1 0 011 1c0 1.31.19 2.5.56 3.6a1 1 0 01-.24 1l-2.12 2.6z" fill="#374151"/></svg>
           <span>Start voice call</span>
-        </div>
-        <div class="row" onclick="alert('Sending voice note…')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3a4 4 0 00-4 4v6a4 4 0 108 0V7a4 4 0 00-4-4zm-6 7a1 1 0 011 1v2a7 7 0 0014 0v-2a1 1 0 112 0v2a9 9 0 01-18 0v-2a1 1 0 011-1z" fill="currentColor"/></svg>
-          <span>Send voice note</span>
-        </div>
-      </div>
-      <div class="tooltip calendar" id="calTip" role="dialog" aria-label="Calendar menu">
-        <div class="row" onclick="alert('Opening calendar…')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 112 0v1zm13 7H4v10h16V9z" fill="currentColor"/></svg>
-          <span>Create meeting</span>
-        </div>
-        <div class="row" onclick="alert('Sharing availability…')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v14l-4-3H6a2 2 0 01-2-2V5z" fill="currentColor"/></svg>
-          <span>Share availability</span>
         </div>
       </div>
     </div>
@@ -201,20 +222,81 @@
     const phoneBtn = document.getElementById('phoneBtn');
     const calBtn = document.getElementById('calBtn');
     const phoneTip = document.getElementById('phoneTip');
-    const calTip = document.getElementById('calTip');
+    const calOverlay = document.getElementById('calOverlay');
+    const calClose = document.getElementById('calClose');
+    const calMonth = document.getElementById('calMonth');
+    const calStack = document.getElementById('calStack');
+    const calPrev = document.getElementById('calPrev');
+    const calNext = document.getElementById('calNext');
+    const calDone = document.getElementById('calDone');
 
     function toggleTip(tip){
+      if(!tip) return; // guard
       tip.classList.toggle('show');
-      // Close the other tooltip if open
-      if(tip === phoneTip) calTip.classList.remove('show');
-      if(tip === calTip) phoneTip.classList.remove('show');
     }
-    phoneBtn.addEventListener('click', ()=> toggleTip(phoneTip));
-    calBtn.addEventListener('click', ()=> toggleTip(calTip));
+    if (phoneBtn) phoneBtn.addEventListener('click', ()=> toggleTip(phoneTip));
+
+    // Calendar overlay events (guarded in case of future edits)
+    if (calBtn && calOverlay && calClose && calStack && calMonth) {
+      let weekOffset = 0; // 0 = current week, -1 = previous, +1 = next
+
+      function startOfWeek(d){
+        const date = new Date(d);
+        const day = (date.getDay()+6)%7; // Mon=0..Sun=6
+        date.setDate(date.getDate()-day);
+        date.setHours(0,0,0,0);
+        return date;
+      }
+      function fmtMonthRange(start){
+        const end = new Date(start); end.setDate(start.getDate()+6);
+        const opts = { month:'short', day:'numeric' };
+        return `${start.toLocaleDateString(undefined,opts)} – ${end.toLocaleDateString(undefined,opts)}`;
+      }
+      function renderCalendar(){
+        const base = startOfWeek(new Date());
+        base.setDate(base.getDate()+weekOffset*7);
+        calMonth.textContent = fmtMonthRange(base);
+        calStack.innerHTML = '';
+        for(let i=0;i<7;i++){
+          const d = new Date(base); d.setDate(base.getDate()+i);
+          const wrap = document.createElement('div');
+          wrap.className = 'cal-item'+(isToday(d)?' today':'');
+          const head = document.createElement('div'); head.className='cal-head';
+          const name = document.createElement('div'); name.className='cal-dayname';
+          name.textContent = d.toLocaleDateString(undefined,{ weekday:'short' });
+          const date = document.createElement('div'); date.className='cal-date';
+          date.textContent = d.getDate();
+          head.appendChild(name); head.appendChild(date);
+          const notes = document.createElement('div'); notes.className='cal-notes';
+          notes.appendChild(noteRow('First note placeholder'));
+          notes.appendChild(noteRow('Second note placeholder'));
+          wrap.appendChild(head);
+          wrap.appendChild(notes);
+          calStack.appendChild(wrap);
+        }
+      }
+      function isToday(d){ const t=new Date(); return d.getFullYear()==t.getFullYear() && d.getMonth()==t.getMonth() && d.getDate()==t.getDate(); }
+      function noteRow(text){
+        const row = document.createElement('div'); row.className='cal-note';
+        const dot = document.createElement('div'); dot.className='cal-bullet';
+        const span = document.createElement('div'); span.textContent=text;
+        row.appendChild(dot); row.appendChild(span); return row;
+      }
+
+      calBtn.addEventListener('click', ()=> { renderCalendar(); calOverlay.classList.add('show'); });
+      calClose.addEventListener('click', ()=> calOverlay.classList.remove('show'));
+      calDone.addEventListener('click', ()=> calOverlay.classList.remove('show'));
+      calPrev.addEventListener('click', ()=> { weekOffset--; renderCalendar(); });
+      calNext.addEventListener('click', ()=> { weekOffset++; renderCalendar(); });
+      calOverlay.addEventListener('click', (e)=>{ if(e.target === calOverlay) calOverlay.classList.remove('show'); });
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') calOverlay.classList.remove('show'); });
+    } else {
+      console.warn('Calendar elements not fully found:', { calBtn: !!calBtn, calOverlay: !!calOverlay, calClose: !!calClose, calStack: !!calStack, calMonth: !!calMonth });
+    }
+
     document.addEventListener('click', (e)=>{
       if(!e.target.closest('.icon-btn') && !e.target.closest('.tooltip')){
-        phoneTip.classList.remove('show');
-        calTip.classList.remove('show');
+        if (phoneTip) phoneTip.classList.remove('show');
       }
     });
 
@@ -233,7 +315,7 @@
       const now = new Date();
       const hh = now.getHours().toString().padStart(2,'0');
       const mm = now.getMinutes().toString().padStart(2,'0');
-      meta.innerHTML = `<span class="stamp">${hh}:${mm}</span> · <span>${who==='me'?'Streak ×3':'Lvl 5'}</span>`;
+      meta.innerHTML = `<span class="stamp">${hh}:${mm}</span>`;
       box.appendChild(bubble); box.appendChild(meta);
       wrap.appendChild(avatar); wrap.appendChild(box);
       messagesEl.appendChild(wrap);
@@ -270,11 +352,73 @@
     });
     sendBtn.addEventListener('click', handleSend);
 
-    // Accessibility: announce new messages
     const observer = new MutationObserver(()=>{
       messagesEl.setAttribute('aria-live','polite');
     });
     observer.observe(messagesEl, { childList:true });
+
+    // --- Simple UI Tests (run once on load) ---
+    (function runUITests(){
+      const results = [];
+      function test(name, fn){
+        try { fn(); results.push({ test:name, pass:true }); }
+        catch(err){ console.error(name, err); results.push({ test:name, pass:false, err: String(err) }); }
+      }
+
+      test('Calendar elements exist', ()=>{
+        console.assert(!!document.getElementById('calOverlay'), 'calOverlay missing');
+        console.assert(!!document.getElementById('calClose'), 'calClose missing');
+        console.assert(!!document.getElementById('calBtn'), 'calBtn missing');
+      });
+
+      test('Open & close calendar overlay via API', ()=>{
+        const overlay = document.getElementById('calOverlay');
+        overlay.classList.add('show');
+        console.assert(overlay.classList.contains('show'), 'overlay did not open');
+        overlay.classList.remove('show');
+        console.assert(!overlay.classList.contains('show'), 'overlay did not close');
+      });
+
+      test('Render 7 calendar items', ()=>{
+        const stack = document.getElementById('calStack');
+        document.getElementById('calBtn').click();
+        console.assert(stack.children.length === 7, 'expected 7 items, got '+stack.children.length);
+        document.getElementById('calClose').click();
+      });
+
+      test('Today is highlighted', ()=>{
+        document.getElementById('calBtn').click();
+        const found = Array.from(document.querySelectorAll('.cal-item.today')).length;
+        console.assert(found === 1, 'expected exactly one .today, got '+found);
+        document.getElementById('calClose').click();
+      });
+
+      // Additional tests
+      test('Button opens overlay & Done closes', ()=>{
+        const overlay = document.getElementById('calOverlay');
+        document.getElementById('calBtn').click();
+        console.assert(overlay.classList.contains('show'), 'overlay not opened by button');
+        document.getElementById('calDone').click();
+        console.assert(!overlay.classList.contains('show'), 'overlay not closed by Done');
+      });
+
+      test('ESC closes overlay', ()=>{
+        const overlay = document.getElementById('calOverlay');
+        document.getElementById('calBtn').click();
+        const ev = new KeyboardEvent('keydown', { key:'Escape' });
+        document.dispatchEvent(ev);
+        console.assert(!overlay.classList.contains('show'), 'overlay not closed by ESC');
+      });
+
+      test('Backdrop click closes overlay', ()=>{
+        const overlay = document.getElementById('calOverlay');
+        document.getElementById('calBtn').click();
+        overlay.click();
+        console.assert(!overlay.classList.contains('show'), 'overlay not closed by backdrop click');
+      });
+
+      console.table(results);
+    })();
   </script>
 </body>
 </html>
